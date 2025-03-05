@@ -15,11 +15,10 @@ app.use(cors());
 app.use(json());
 
 // Connexion à MongoDB
-connect(process.env.MONGO_URI, {})
+connect(process.env.MONGO_URI_PROD, {})
   .then(() => console.log("MongoDB connecté"))
   .catch((err) => console.log(err));
 
-// Routes
 app.use("/articles", articleRouter);
 app.use("/categories", categorieRouter);
 
