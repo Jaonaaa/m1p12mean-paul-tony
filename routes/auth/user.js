@@ -38,7 +38,7 @@ userAuthRouter.post("/login", async (req, res, next) => {
       { userId: user._id, email: user.email, firstname: user.firstname, lastname: user.lastname, role: user.role },
       JWT_KEY,
       {
-        expiresIn: "30s",
+        expiresIn: "1h",
       }
     );
     res.status(200).json(new Response("Connecté", Status.Ok, { token }));
