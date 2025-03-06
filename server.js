@@ -1,29 +1,24 @@
-import express, { json } from "express";
-import { connect } from "mongoose";
-import cors from "cors";
-import articleRouter from "./routes/articles.js";
 import dotenv from "dotenv";
-import categorieRouter from "./routes/categories.js";
+import express from "express";
+import { dbConnection } from "./config/db/index.js";
+import { setup, setupCustom } from "./middleware/index.js";
+import Routes from "./routes/index.js";
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
-app.use(cors());
-app.use(json());
+//Middleware
+setup(app);
 
-// Connexion à MongoDB
-connect(process.env.MONGO_URI_PROD, {})
-  .then(() => console.log("MongoDB connecté"))
-  .catch((err) => console.log(err));
+// Routes
+app.use(Routes());
 
-app.use("/articles", articleRouter);
-app.use("/categories", categorieRouter);
+// Custom Middleware
+setupCustom(app);
 
-app.get("/", (req, res) => {
-  res.send("API RESTful avec Express et MongoDB");
-});
+// Database Connection
+await dbConnection();
 
 app.listen(PORT, () => console.log(`Serveur démarré: http://localhost:${PORT}`));
