@@ -11,6 +11,16 @@ dotenv.config();
 const userAuthRouter = Router();
 const JWT_KEY = process.env.JWT_KEY;
 
+const buildToken = (user, role) => {
+  const token = jsonwebtoken.sign(
+    { userId: user._id, email: user.email, firstname: user.firstname, lastname: user.lastname, role },
+    JWT_KEY,
+    {
+      expiresIn: "1h",
+    }
+  );
+  return token;
+};
 userAuthRouter.post("/register", async (req, res, next) => {
   try {
     const { password } = req.body;
@@ -20,9 +30,16 @@ userAuthRouter.post("/register", async (req, res, next) => {
     const user = new User({ ...req.body, password: hashedPassword, role: clientRole._id });
     await user.save();
 
+    const token = buildToken(user, clientRole);
     res.status(201).json(
       new Response("Utilisateur enregistré", Status.Ok, {
-        user: { lastname: user.lastname, firstname: user.firstname, email: user.email, role: { label: clientRole.label } },
+        user: {
+          lastname: user.lastname,
+          firstname: user.firstname,
+          email: user.email,
+          role: { label: clientRole.label },
+        },
+        token: token,
       })
     );
   } catch (error) {
@@ -39,13 +56,8 @@ userAuthRouter.post("/login", async (req, res, next) => {
     const passwordMatch = await compare(password, user.password);
     if (!passwordMatch) throw new MyError("Email ou mot de passe incorrect");
 
-    const token = jsonwebtoken.sign(
-      { userId: user._id, email: user.email, firstname: user.firstname, lastname: user.lastname, role: user.role },
-      JWT_KEY,
-      {
-        expiresIn: "1h",
-      }
-    );
+    const token = buildToken(user, { role: user.role });
+
     res.status(200).json(new Response("Connecté", Status.Ok, { token }));
   } catch (error) {
     next(error);

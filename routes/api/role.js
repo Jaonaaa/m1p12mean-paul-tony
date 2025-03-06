@@ -24,7 +24,7 @@ roleRouter.delete("/:id", async (req, res) => {
 });
 
 export const findRole = async (label) => {
-  return await Role.findOne({ label: label });
+  return await Role.findOne({ label: label }).select("label");
 };
 
 export default roleRouter;
