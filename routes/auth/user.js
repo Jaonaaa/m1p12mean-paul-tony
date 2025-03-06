@@ -19,7 +19,12 @@ userAuthRouter.post("/register", async (req, res, next) => {
     // Verifie que l'email n'exite déja pour un message perso :3
     const user = new User({ ...req.body, password: hashedPassword, role: clientRole._id });
     await user.save();
-    res.status(201).json(new Response("Utilisateur enregistré", Status.Ok, { user, ...user }));
+
+    res.status(201).json(
+      new Response("Utilisateur enregistré", Status.Ok, {
+        user: { lastname: user.lastname, firstname: user.firstname, email: user.email, role: { label: clientRole.label } },
+      })
+    );
   } catch (error) {
     next(new Response("Échec de l'inscription"));
   }
