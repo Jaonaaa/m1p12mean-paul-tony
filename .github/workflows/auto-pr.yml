@@ -1,0 +1,51 @@
+name: Auto PR to Main
+on:
+  push:
+    branches:
+      - develop
+jobs:
+  create-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create Pull Request
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { owner, repo } = context.repo;
+            const actor = context.actor;
+
+            const existingPRs = await github.rest.pulls.list({
+              owner,
+              repo,
+              head: `${owner}:develop`,
+              base: 'main',
+              state: 'open'
+            });
+
+            const prBody = `This PR was automatically created by GitHub Actions.\n\nTriggered by: @${actor}`;
+
+            if (existingPRs.data.length === 0) {
+              const response = await github.rest.pulls.create({
+                owner,
+                repo,
+                title: "Auto PR: Merge `develop` into `main`",
+                body: prBody,
+                head: 'develop',
+                base: 'main'
+              });
+              
+              await github.rest.issues.addLabels({
+                owner,
+                repo,
+                issue_number: response.data.number,
+                labels: ['auto-pr','magic']
+              });
+              
+              console.log(`Created PR #${response.data.number}: ${response.data.html_url}`);
+            } else {
+              console.log(`PR already exists: ${existingPRs.data[0].html_url}`);
+            }

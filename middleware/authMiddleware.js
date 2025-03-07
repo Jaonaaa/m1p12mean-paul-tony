@@ -8,7 +8,7 @@ import jwt from "jsonwebtoken";
 
 /**
  * @typedef {Object} JwtPayload
- * @property {string} userId
+ * @property {string} _id
  * @property {string} email
  * @property {string} firstname
  * @property {string} lastname
@@ -27,7 +27,7 @@ const authenticateToken = (req, res, next) => {
   const handleVerification = (err, payload) => {
     if (err) return res.status(403).json({ message: "Token invalide" });
     // Verifie le 'Role' dans le payload pour certain accesibilité de ressource
-    req.jwt = payload;
+    req.user = payload;
     next();
   };
   jwt.verify(token, process.env.JWT_KEY, handleVerification);

@@ -1,6 +1,5 @@
 import { connect } from "mongoose";
 
-// Connexion à MongoDB
 // MONGO_URI_PROD
 // MONGO_URI
 /**
