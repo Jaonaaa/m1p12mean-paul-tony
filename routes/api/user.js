@@ -1,18 +1,13 @@
 import { Router } from "express";
 import User from "../../models/User.js";
 import MyError from "../../models/app/MyError.js";
-import { Status } from "../../models/app/Response.js";
+import Response, { Status } from "../../models/app/Response.js";
 var userRouter = Router();
 
 userRouter.get("/all", async (_, res) => {
   const roles = await User.find().select("-password -email");
   res.json(new Response(null, Status.Ok, roles));
 });
-
-// userRouter.put("/:id", async (req, res) => {
-//   const role = await Role.findByIdAndUpdate(req.params.id, req.body, { new: true });
-//   res.json(role);
-// });
 
 userRouter.put("/picture", async (req, res, next) => {
   try {

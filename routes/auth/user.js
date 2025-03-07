@@ -15,7 +15,7 @@ const { JWT_KEY } = process.env;
 const buildToken = (user, role) =>
   jsonwebtoken.sign(
     {
-      userId: user._id,
+      _id: user._id,
       email: user.email,
       firstname: user.firstname,
       lastname: user.lastname,
@@ -45,6 +45,7 @@ userAuthRouter.post("/register", async (req, res, next) => {
     res.status(201).json(
       new Response("Utilisateur enregistré", Status.Ok, {
         user: {
+          _id: user._id,
           lastname: user.lastname,
           firstname: user.firstname,
           email: user.email,
