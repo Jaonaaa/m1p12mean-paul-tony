@@ -6,8 +6,11 @@ import authenticateToken from "../middleware/authMiddleware.js";
 const routes = express.Router();
 
 export default () => {
-  routes.get("/", (_, res, next) => {
+  routes.get("/", (_, res) => {
     res.redirect(process.env.URL_FRONT);
+  });
+  routes.get("/yolo", (_, res) => {
+    res.send({ message: "YOLO" });
   });
   //
   routes.use("/api", authenticateToken, apiRouter);
