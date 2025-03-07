@@ -82,3 +82,5 @@ web_modules/
 .vscode 
 
 history
+
+test.js

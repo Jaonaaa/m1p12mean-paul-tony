@@ -26,7 +26,7 @@ const UserSchema = new Schema(
     },
     picture: {
       type: String,
-      default: "default.png",
+      default: "eb99a2736e6237c3668de38bbe3eec32_qowqzj",
     },
   },
   { timestamps: true }

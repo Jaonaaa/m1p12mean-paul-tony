@@ -6,6 +6,7 @@ import User from "../../models/User.js";
 import { findRole } from "../api/role.js";
 import MyError from "../../models/app/MyError.js";
 import Response, { Status } from "../../models/app/Response.js";
+import { getCloudinaryUrl } from "../../services/api/user/upload/index.js";
 
 dotenv.config();
 
@@ -19,12 +20,23 @@ const buildToken = (user, role) =>
       email: user.email,
       firstname: user.firstname,
       lastname: user.lastname,
+      picture: getCloudinaryUrl(user.picture),
       role,
     },
     JWT_KEY,
     { expiresIn: "1d" }
   );
 
+const buildUser = (user, role) => {
+  return {
+    _id: user._id,
+    lastname: user.lastname,
+    firstname: user.firstname,
+    email: user.email,
+    picture: getCloudinaryUrl(user.picture, { width: 200, height: 200 }),
+    role: { label: role.label },
+  };
+};
 const handleTokenVerification = (token, extractRole = false) => {
   if (!token) throw new MyError("Token requis", 500);
   return jsonwebtoken.verify(token, JWT_KEY, (err, payload) => {
@@ -49,13 +61,15 @@ userAuthRouter.post("/register", async (req, res, next) => {
           lastname: user.lastname,
           firstname: user.firstname,
           email: user.email,
+          picture: getCloudinaryUrl(user.picture),
           role: { label: clientRole.label },
         },
         token: buildToken(user, clientRole),
       })
     );
-  } catch {
-    next(new Response("Échec de l'inscription"));
+  } catch (error) {
+    // Customiser les messages d'erreur
+    next(new Response("Échec de l'inscription / Still not done  /" + error.message));
   }
 });
 
@@ -66,8 +80,9 @@ userAuthRouter.post("/login", async (req, res, next) => {
     if (!user || !(await compare(password, user.password))) {
       throw new MyError("Email ou mot de passe incorrect");
     }
-
-    res.status(200).json(new Response("Connecté", Status.Ok, { token: buildToken(user, user.role) }));
+    res
+      .status(200)
+      .json(new Response("Connecté", Status.Ok, { user: buildUser(user, user.role), token: buildToken(user, user.role) }));
   } catch (error) {
     next(error);
   }
