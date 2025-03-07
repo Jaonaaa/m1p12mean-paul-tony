@@ -19,6 +19,6 @@ app.use(Routes());
 setupCustom(app);
 
 // Database Connection
-await dbConnection();
+await dbConnection({ prod: false });
 
 app.listen(PORT, () => console.log(`Serveur démarré: http://localhost:${PORT}`));

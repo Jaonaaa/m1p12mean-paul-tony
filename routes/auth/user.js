@@ -1,36 +1,47 @@
 import { compare, hash } from "bcrypt";
 import { Router } from "express";
 import jsonwebtoken from "jsonwebtoken";
+import dotenv from "dotenv";
 import User from "../../models/User.js";
 import { findRole } from "../api/role.js";
 import MyError from "../../models/app/MyError.js";
-import dotenv from "dotenv";
 import Response, { Status } from "../../models/app/Response.js";
 
 dotenv.config();
-const userAuthRouter = Router();
-const JWT_KEY = process.env.JWT_KEY;
 
-const buildToken = (user, role) => {
-  const token = jsonwebtoken.sign(
-    { userId: user._id, email: user.email, firstname: user.firstname, lastname: user.lastname, role },
-    JWT_KEY,
+const userAuthRouter = Router();
+const { JWT_KEY } = process.env;
+
+const buildToken = (user, role) =>
+  jsonwebtoken.sign(
     {
-      expiresIn: "1h",
-    }
+      userId: user._id,
+      email: user.email,
+      firstname: user.firstname,
+      lastname: user.lastname,
+      role,
+    },
+    JWT_KEY,
+    { expiresIn: "1d" }
   );
-  return token;
+
+const handleTokenVerification = (token, extractRole = false) => {
+  if (!token) throw new MyError("Token requis", 500);
+  return jsonwebtoken.verify(token, JWT_KEY, (err, payload) => {
+    if (err?.name === "TokenExpiredError") throw new MyError("Token expiré", 401);
+    return extractRole ? payload.role : payload;
+  });
 };
+
 userAuthRouter.post("/register", async (req, res, next) => {
   try {
-    const { password } = req.body;
+    const { password, ...userData } = req.body;
     const hashedPassword = await hash(password, 10);
     const clientRole = await findRole("client");
-    // Verifie que l'email n'exite déja pour un message perso :3
-    const user = new User({ ...req.body, password: hashedPassword, role: clientRole._id });
+
+    const user = new User({ ...userData, password: hashedPassword, role: clientRole._id });
     await user.save();
 
-    const token = buildToken(user, clientRole);
     res.status(201).json(
       new Response("Utilisateur enregistré", Status.Ok, {
         user: {
@@ -39,10 +50,10 @@ userAuthRouter.post("/register", async (req, res, next) => {
           email: user.email,
           role: { label: clientRole.label },
         },
-        token: token,
+        token: buildToken(user, clientRole),
       })
     );
-  } catch (error) {
+  } catch {
     next(new Response("Échec de l'inscription"));
   }
 });
@@ -51,14 +62,11 @@ userAuthRouter.post("/login", async (req, res, next) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email }).populate("role", "label");
-    if (!user) throw new MyError("Email non inscrit sur Vroom");
+    if (!user || !(await compare(password, user.password))) {
+      throw new MyError("Email ou mot de passe incorrect");
+    }
 
-    const passwordMatch = await compare(password, user.password);
-    if (!passwordMatch) throw new MyError("Email ou mot de passe incorrect");
-
-    const token = buildToken(user, { role: user.role });
-
-    res.status(200).json(new Response("Connecté", Status.Ok, { token }));
+    res.status(200).json(new Response("Connecté", Status.Ok, { token: buildToken(user, user.role) }));
   } catch (error) {
     next(error);
   }
@@ -66,17 +74,15 @@ userAuthRouter.post("/login", async (req, res, next) => {
 
 userAuthRouter.post("/token", async (req, res, next) => {
   try {
-    const { token } = req.body;
-    if (!token) throw new MyError("Token requis", 500);
-    const payload = jsonwebtoken.verify(token, JWT_KEY, (err, payload) => {
-      if (err) {
-        if (err.name === "TokenExpiredError") {
-          throw new MyError("Token expiré", 401);
-        }
-      }
-      return payload;
-    });
-    res.status(200).json({ ...payload });
+    res.status(200).json(handleTokenVerification(req.body.token));
+  } catch (error) {
+    next(error);
+  }
+});
+
+userAuthRouter.post("/token/role", async (req, res, next) => {
+  try {
+    res.status(200).json(handleTokenVerification(req.body.token, true));
   } catch (error) {
     next(error);
   }
