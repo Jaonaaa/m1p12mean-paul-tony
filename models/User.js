@@ -24,6 +24,10 @@ const UserSchema = new Schema(
       ref: "Role",
       required: true,
     },
+    picture: {
+      type: String,
+      default: "default.png",
+    },
   },
   { timestamps: true }
 );
