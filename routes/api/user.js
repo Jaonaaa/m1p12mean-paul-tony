@@ -11,13 +11,14 @@ userRouter.get("/all", async (_, res) => {
 
 userRouter.put("/picture", async (req, res, next) => {
   try {
-    if (req.body.id === undefined) throw new MyError("L'id est requis", 500);
+    const { _id } = req.user;
+    if (_id === undefined) throw new MyError("L'id est requis", 500);
 
-    const user = await User.findById(req.body.id);
+    const user = await User.findById(_id);
     if (!user) throw new MyError("Utilisateur introuvable", 404);
 
     user.picture = req.body.picture;
-    const updated_user = await User.findByIdAndUpdate(req.body.id, user);
+    const updated_user = await User.findByIdAndUpdate(user._id, user);
 
     res.json(new Response("Image modifiée", Status.Ok, updated_user));
   } catch (error) {
