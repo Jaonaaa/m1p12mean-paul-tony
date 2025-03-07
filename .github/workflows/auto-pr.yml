@@ -9,6 +9,31 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate PR title and body
+        id: pr-content
+        run: |
+          COMMIT_LIST=$(git log --format="%s" main..develop)
+
+          COMMIT_COUNT=$(echo "$COMMIT_LIST" | wc -l)
+
+          TOP_CATEGORIES=$(echo "$COMMIT_LIST" | grep -o "^[a-zA-Z]\+:" | sort | uniq -c | sort -nr | head -3 | awk '{print $2}' | tr '\n' ' ' | sed 's/:/ /g')
+
+          if [ -n "$TOP_CATEGORIES" ]; then
+            TITLE="[$(echo $TOP_CATEGORIES | xargs)] Merge develop with $COMMIT_COUNT changes"
+          else
+            TITLE="Merge develop with $COMMIT_COUNT changes"
+          fi
+
+          BODY="## Changes included in this PR:\n\n"
+          BODY+=$(git log --format="* %s" main..develop)
+
+          echo "title=$TITLE" >> $GITHUB_OUTPUT
+          echo "body<<EOF" >> $GITHUB_OUTPUT
+          echo "$BODY" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Create Pull Request
         uses: actions/github-script@v7
@@ -16,8 +41,9 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const { owner, repo } = context.repo;
+            const prTitle = `${{ steps.pr-content.outputs.title }}`;
+            const prBody = `${{ steps.pr-content.outputs.body }}`;
 
-            // Check if PR already exists
             const existingPRs = await github.rest.pulls.list({
               owner,
               repo,
@@ -27,17 +53,15 @@ jobs:
             });
 
             if (existingPRs.data.length === 0) {
-              // Create a new PR if none exists
               const response = await github.rest.pulls.create({
                 owner,
                 repo,
-                title: "Auto PR: Merge `develop` into `main`",
-                body: "This PR was automatically created by GitHub Actions.",
+                title: prTitle,
+                body: prBody,
                 head: 'develop',
                 base: 'main'
               });
               
-              // Add label to the newly created PR
               await github.rest.issues.addLabels({
                 owner,
                 repo,
@@ -48,4 +72,14 @@ jobs:
               console.log(`Created PR #${response.data.number}: ${response.data.html_url}`);
             } else {
               console.log(`PR already exists: ${existingPRs.data[0].html_url}`);
+              
+              // Optionally update existing PR title and body
+              await github.rest.pulls.update({
+                owner,
+                repo,
+                pull_number: existingPRs.data[0].number,
+                title: prTitle,
+                body: prBody
+              });
+              console.log(`Updated PR #${existingPRs.data[0].number} with new title and description`);
             }
