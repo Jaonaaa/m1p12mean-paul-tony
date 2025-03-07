@@ -74,7 +74,7 @@ userAuthRouter.post("/login", async (req, res, next) => {
 
 userAuthRouter.post("/token", async (req, res, next) => {
   try {
-    res.status(200).json(handleTokenVerification(req.body.token));
+    res.status(200).json(new Response("", Status.Ok, handleTokenVerification(req.body.token)));
   } catch (error) {
     next(error);
   }
@@ -82,7 +82,7 @@ userAuthRouter.post("/token", async (req, res, next) => {
 
 userAuthRouter.post("/token/role", async (req, res, next) => {
   try {
-    res.status(200).json(handleTokenVerification(req.body.token, true));
+    res.status(200).json(new Response("", Status.Ok, handleTokenVerification(req.body.token, true)));
   } catch (error) {
     next(error);
   }
