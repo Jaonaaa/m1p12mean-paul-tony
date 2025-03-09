@@ -1,7 +1,7 @@
 import { Router } from "express";
 import Role from "../../models/Role.js";
 import Response, { Status } from "../../models/app/Response.js";
-var roleRouter = Router();
+const roleRouter = Router();
 
 roleRouter.post("/", async (req, res) => {
   const role = new Role(req.body);
