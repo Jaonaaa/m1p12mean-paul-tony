@@ -3,7 +3,7 @@ import User from "../../models/User.js";
 import MyError from "../../models/app/MyError.js";
 import Response, { Status } from "../../models/app/Response.js";
 import uploadBase64ToCloudinary from "../../services/api/user/upload/index.js";
-var userRouter = Router();
+const userRouter = Router();
 
 userRouter.get("/all", async (_, res) => {
   const users = await User.find().select("-password -email");

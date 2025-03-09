@@ -1,9 +1,10 @@
-import mongoose from "mongoose";
+import { Schema, model } from "mongoose";
 
-const employeSchema = new mongoose.Schema({
-  id_user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+const employeSchema = new Schema({
+  id_user: { type: Schema.Types.ObjectId, ref: "User", required: true },
   entered_at: { type: Date },
   salary: { type: Number },
+  skills: [{ type: Schema.Types.ObjectId, ref: "Skill" }],
 });
 
-export default mongoose.model("Employe", employeSchema);
+export default model("Employe", employeSchema);

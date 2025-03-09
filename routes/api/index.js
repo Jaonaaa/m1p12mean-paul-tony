@@ -7,11 +7,13 @@ import workRouter from "./work.js";
 import employeRouter from "./employe.js";
 import employeWorkTimeRouter from "./employe_work_time.js";
 import servicesDetailsInDevisRouter from "./services_details_in_devis.js";
+import skillRouter from "./skill.js";
 
 const apiRouter = express.Router();
 
 apiRouter.use("/role", roleRouter);
 apiRouter.use("/user", userRouter);
+apiRouter.use("/skill", skillRouter);
 apiRouter.use("/service", serviceRouter);
 apiRouter.use("/devis", devisRouter);
 apiRouter.use("/work", workRouter);
