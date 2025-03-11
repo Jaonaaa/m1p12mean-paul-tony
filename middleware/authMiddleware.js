@@ -19,6 +19,8 @@ import jwt from "jsonwebtoken";
 
 const authenticateToken = (req, res, next) => {
   const token = req.header("Authorization")?.split(" ")[1];
+  // check if user exist and is valid ?
+  // TODO
   if (!token) return res.status(401).json({ message: "T'es pas autorisé a voir ca XDD" });
   /**
    * @param {jwt.VerifyErrors | null} err
