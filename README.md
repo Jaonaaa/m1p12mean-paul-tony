@@ -15,10 +15,10 @@ Backend of the Vroom project, an application to manage a garage. This backend ha
 
 - **Node.js**: JavaScript runtime for building the backend.
 - **Express.js**: Web framework for Node.js.
-- **MongoDB**: NoSQL database for storing user and garage data.
+- **MongoDB**: NoSQL database for storing data.
 - **JWT**: JSON Web Tokens for secure authentication.
 - **Bcrypt**: Library for hashing passwords.
-- **Cloudinary**: Service for managing user profile pictures.
+- **Cloudinary**: Service for managing all media files.
 
 ### Prerequisites
 
