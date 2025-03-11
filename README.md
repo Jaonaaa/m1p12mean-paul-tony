@@ -1,3 +1,5 @@
+![Vroom-Back Logo](https://res.cloudinary.com/dxvb6pnu2/image/upload/f_auto/q_auto/Vroom_htcmmd?_a=BAMCkGcc0)
+
 # Vroom-Back
 
 Backend of the Vroom project, an application to manage a garage. This backend handles user authentication, role-based access control, and provides APIs for managing the internal processes of the garage.
@@ -9,7 +11,7 @@ Backend of the Vroom project, an application to manage a garage. This backend ha
 - **User Management**: APIs to manage user profiles and roles.
 - **Dashboard**: APIs to support the dashboard for managing internal processes.
 
-## Technologies Used
+## Technologies
 
 - **Node.js**: JavaScript runtime for building the backend.
 - **Express.js**: Web framework for Node.js.
@@ -17,8 +19,6 @@ Backend of the Vroom project, an application to manage a garage. This backend ha
 - **JWT**: JSON Web Tokens for secure authentication.
 - **Bcrypt**: Library for hashing passwords.
 - **Cloudinary**: Service for managing user profile pictures.
-
-## Getting Started
 
 ### Prerequisites
 
