@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { ROLES } from "../models/Role";
+import { ROLES } from "../models/Role.js";
 
 /**
  * @typedef {Object} UserRole
