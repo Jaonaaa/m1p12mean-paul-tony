@@ -7,6 +7,7 @@ import { findRole } from "../api/role.js";
 import MyError from "../../models/app/MyError.js";
 import Response, { Status } from "../../models/app/Response.js";
 import { getCloudinaryUrl } from "../../services/api/user/upload/index.js";
+import { formatUser, registerUser, validateUser } from "../../services/auth/user.js";
 
 dotenv.config();
 
@@ -16,11 +17,7 @@ const { JWT_KEY } = process.env;
 const buildToken = (user, role) =>
   jsonwebtoken.sign(
     {
-      _id: user._id,
-      email: user.email,
-      firstname: user.firstname,
-      lastname: user.lastname,
-      picture: getCloudinaryUrl(user.picture),
+      ...user,
       role,
     },
     JWT_KEY,
@@ -29,10 +26,7 @@ const buildToken = (user, role) =>
 
 const buildUser = (user, role) => {
   return {
-    _id: user._id,
-    lastname: user.lastname,
-    firstname: user.firstname,
-    email: user.email,
+    ...user,
     picture: getCloudinaryUrl(user.picture, { width: 200, height: 200 }),
     role: { label: role.label },
   };
@@ -47,29 +41,16 @@ const handleTokenVerification = (token, extractRole = false) => {
 
 userAuthRouter.post("/register", async (req, res, next) => {
   try {
-    const { password, ...userData } = req.body;
-    const hashedPassword = await hash(password, 10);
-    const clientRole = await findRole("client");
-
-    const user = new User({ ...userData, password: hashedPassword, role: clientRole._id });
-    await user.save();
-
+    validateUser(req.body);
+    const { user, role } = await registerUser(req.body);
     res.status(201).json(
       new Response("Utilisateur enregistré", Status.Ok, {
-        user: {
-          _id: user._id,
-          lastname: user.lastname,
-          firstname: user.firstname,
-          email: user.email,
-          picture: getCloudinaryUrl(user.picture),
-          role: { label: clientRole.label },
-        },
-        token: buildToken(user, clientRole),
+        user: { ...user, role: { label: role } },
+        token: buildToken(user, role),
       })
     );
   } catch (error) {
-    // Customiser les messages d'erreur
-    next(new Response("Échec de l'inscription / Still not done  /" + error.message));
+    next(new Response(error.message));
   }
 });
 
@@ -77,12 +58,11 @@ userAuthRouter.post("/login", async (req, res, next) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email }).populate("role", "label");
-    if (!user || !(await compare(password, user.password))) {
-      throw new MyError("Email ou mot de passe incorrect");
-    }
-    res
-      .status(200)
-      .json(new Response("Connecté", Status.Ok, { user: buildUser(user, user.role), token: buildToken(user, user.role) }));
+    if (!user || !(await compare(password, user.password))) throw new MyError("Email ou mot de passe incorrect");
+    let formated_user = formatUser(user);
+    res.json(
+      new Response("Connecté", Status.Ok, { user: buildUser(formated_user, user.role), token: buildToken(formated_user, user.role) })
+    );
   } catch (error) {
     next(error);
   }
