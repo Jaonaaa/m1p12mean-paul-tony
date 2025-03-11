@@ -1,11 +1,10 @@
-import { compare, hash } from "bcrypt";
+import { compare } from "bcrypt";
+import dotenv from "dotenv";
 import { Router } from "express";
 import jsonwebtoken from "jsonwebtoken";
-import dotenv from "dotenv";
-import User from "../../models/User.js";
-import { findRole } from "../api/role.js";
 import MyError from "../../models/app/MyError.js";
 import Response, { Status } from "../../models/app/Response.js";
+import User from "../../models/User.js";
 import { getCloudinaryUrl } from "../../services/api/user/upload/index.js";
 import { formatUser, registerUser, validateUser } from "../../services/auth/user.js";
 
@@ -14,23 +13,12 @@ dotenv.config();
 const userAuthRouter = Router();
 const { JWT_KEY } = process.env;
 
-const buildToken = (user, role) =>
-  jsonwebtoken.sign(
-    {
-      ...user,
-      role,
-    },
-    JWT_KEY,
-    { expiresIn: "1d" }
-  );
+const buildToken = (user, role) => jsonwebtoken.sign({ ...user, role }, JWT_KEY, { expiresIn: "1d" });
 
 const buildUser = (user, role) => {
-  return {
-    ...user,
-    picture: getCloudinaryUrl(user.picture, { width: 200, height: 200 }),
-    role: { label: role.label },
-  };
+  return { ...user, picture: getCloudinaryUrl(user.picture, { width: 200, height: 200 }), role: { label: role.label } };
 };
+
 const handleTokenVerification = (token, extractRole = false) => {
   if (!token) throw new MyError("Token requis", 500);
   return jsonwebtoken.verify(token, JWT_KEY, (err, payload) => {

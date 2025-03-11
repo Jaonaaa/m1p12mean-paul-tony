@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import { ROLES } from "../models/Role";
 
 /**
  * @typedef {Object} UserRole
@@ -17,22 +18,41 @@ import jwt from "jsonwebtoken";
  * @property {number} exp
  */
 
-const authenticateToken = (req, res, next) => {
+const NOT_AUTHORIZED = { message: "T'es pas autorisé a voir ca XDD" };
+const INVALID_TOKEN = { message: "Token invalide" };
+const MANAGER_ROLE_REQUIRED = { message: "Accès refusé: rôle de manager requis" };
+const MECHANIC_ROLE_REQUIRED = { message: "Accès refusé: rôle de mécanicien requis" };
+
+const verifyToken = (req, res, next, roleCheck, roleErrorMessage = NOT_AUTHORIZED) => {
   const token = req.header("Authorization")?.split(" ")[1];
-  // check if user exist and is valid ?
-  // TODO
-  if (!token) return res.status(401).json({ message: "T'es pas autorisé a voir ca XDD" });
+  if (!token) return res.status(401).json(NOT_AUTHORIZED);
+
   /**
    * @param {jwt.VerifyErrors | null} err
    * @param {JwtPayload} payload
    */
   const handleVerification = (err, payload) => {
-    if (err) return res.status(403).json({ message: "Token invalide" });
-    // Verifie le 'Role' dans le payload pour certain accesibilité de ressource
+    if (err) return res.status(403).json(INVALID_TOKEN);
+    if (roleCheck && !roleCheck(payload.role)) {
+      return res.status(403).json(roleErrorMessage);
+    }
     req.user = payload;
     next();
   };
+
   jwt.verify(token, process.env.JWT_KEY, handleVerification);
 };
 
-export default authenticateToken;
+const authenticateToken = (req, res, next) => {
+  verifyToken(req, res, next);
+};
+
+const authenticateManager = (req, res, next) => {
+  verifyToken(req, res, next, (role) => role.label === ROLES.MANAGER, MANAGER_ROLE_REQUIRED);
+};
+
+const authenticateMechanic = (req, res, next) => {
+  verifyToken(req, res, next, (role) => role.label === ROLES.MECANICIEN, MECHANIC_ROLE_REQUIRED);
+};
+
+export { authenticateToken, authenticateManager, authenticateMechanic };
