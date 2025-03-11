@@ -1,6 +1,6 @@
 ![Vroom-Back Logo](https://res.cloudinary.com/dxvb6pnu2/image/upload/f_auto/q_auto/Vroom_htcmmd?_a=BAMCkGcc0)
 
-# Vroom-Back
+# Vroom
 
 Backend of the Vroom project, an application to manage a garage. This backend handles user authentication, role-based access control, and provides APIs for managing the internal processes of the garage.
 
