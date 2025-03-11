@@ -13,6 +13,14 @@ dotenv.config();
 const userAuthRouter = Router();
 const { JWT_KEY } = process.env;
 
+const MESSAGES = {
+  TOKEN_REQUIRED: "Token requis",
+  TOKEN_EXPIRED: "Token expiré",
+  INVALID_CREDENTIALS: "Email ou mot de passe incorrect",
+  USER_REGISTERED: "Utilisateur enregistré",
+  CONNECTED: "Connecté",
+};
+
 const buildToken = (user, role) => jsonwebtoken.sign({ ...user, role }, JWT_KEY, { expiresIn: "1d" });
 
 const buildUser = (user, role) => {
@@ -20,9 +28,9 @@ const buildUser = (user, role) => {
 };
 
 const handleTokenVerification = (token, extractRole = false) => {
-  if (!token) throw new MyError("Token requis", 500);
+  if (!token) throw new MyError(MESSAGES.TOKEN_REQUIRED, 500);
   return jsonwebtoken.verify(token, JWT_KEY, (err, payload) => {
-    if (err?.name === "TokenExpiredError") throw new MyError("Token expiré", 401);
+    if (err?.name === "TokenExpiredError") throw new MyError(MESSAGES.TOKEN_EXPIRED, 401);
     return extractRole ? payload.role : payload;
   });
 };
@@ -32,7 +40,7 @@ userAuthRouter.post("/register", async (req, res, next) => {
     validateUser(req.body);
     const { user, role } = await registerUser(req.body);
     res.status(201).json(
-      new Response("Utilisateur enregistré", Status.Ok, {
+      new Response(MESSAGES.USER_REGISTERED, Status.Ok, {
         user: { ...user, role: { label: role } },
         token: buildToken(user, role),
       })
@@ -46,10 +54,13 @@ userAuthRouter.post("/login", async (req, res, next) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email }).populate("role", "label");
-    if (!user || !(await compare(password, user.password))) throw new MyError("Email ou mot de passe incorrect");
+    if (!user || !(await compare(password, user.password))) throw new MyError(MESSAGES.INVALID_CREDENTIALS);
     let formated_user = formatUser(user);
     res.json(
-      new Response("Connecté", Status.Ok, { user: buildUser(formated_user, user.role), token: buildToken(formated_user, user.role) })
+      new Response(MESSAGES.CONNECTED, Status.Ok, {
+        user: buildUser(formated_user, user.role),
+        token: buildToken(formated_user, user.role),
+      })
     );
   } catch (error) {
     next(error);
