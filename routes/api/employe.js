@@ -38,9 +38,9 @@ employeRouter.get("/skills", authenticateMechanic, async (req, res, next) => {
 
 employeRouter.put("/skills", authenticateMechanic, async (req, res, next) => {
   try {
-    const { _id } = req.user;
+    const { id_employe } = req.body;
     if (!req.body.skills) throw new MyError(MESSAGES.SKILLS_REQUIRED, 400);
-    const employe = await Employe.findOne({ id_user: _id });
+    const employe = await Employe.findById(id_employe);
     employe.skills = req.body.skills; // Update skills
     await employe.save();
     res.status(200).json(new Response(MESSAGES.SKILLS_UPDATED, Status.Ok, employe));
