@@ -8,6 +8,7 @@ import employeRouter from "./employe.js";
 import employeWorkTimeRouter from "./employe_work_time.js";
 import servicesDetailsInDevisRouter from "./services_details_in_devis.js";
 import skillRouter from "./skill.js";
+import serviceCategoriesRouter from "./service_categories.js";
 
 const apiRouter = express.Router();
 
@@ -20,5 +21,6 @@ apiRouter.use("/work", workRouter);
 apiRouter.use("/employe", employeRouter);
 apiRouter.use("/employe_work_time", employeWorkTimeRouter);
 apiRouter.use("/services_details_in_devis", servicesDetailsInDevisRouter);
+apiRouter.use("/service_categories", serviceCategoriesRouter);
 
 export default apiRouter;
