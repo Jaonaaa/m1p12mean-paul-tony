@@ -13,6 +13,9 @@ import MyError from "../models/app/MyError.js";
  */
 export const paginate = async (Model, page = 1, limit = 10, filter = {}, populate) => {
   try {
+    if (page < 1) page = 1;
+    if (limit < 1) limit = 10;
+
     const skip = (page - 1) * limit;
     const totalDocuments = await Model.countDocuments(filter);
     const totalPages = Math.ceil(totalDocuments / limit);
