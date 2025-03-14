@@ -5,6 +5,7 @@ import { getEmployeSkills } from "../../services/api/employe/index.js";
 import { authenticateManager, authenticateManagerAndMechanic, authenticateMechanic } from "../../middleware/authMiddleware.js";
 import MyError from "../../models/app/MyError.js";
 import Skill from "../../models/Skill.js";
+import { paginate } from "../../utils/pagination.js";
 
 const employeRouter = Router();
 
@@ -15,8 +16,9 @@ const MESSAGES = {
 };
 
 employeRouter.get("/", authenticateManager, async (req, res) => {
-  const employes = await Employe.find().populate("id_user");
-  res.status(200).json(new Response("", Status.Ok, employes));
+  const { page = 1, limit = 10 } = req.query;
+  const { data: employes, totalPages } = await paginate(Employe, page, limit, {}, "id_user");
+  res.status(200).json(new Response("", Status.Ok, { employes, totalPages, page: parseInt(page), limit: parseInt(limit) }));
 });
 
 employeRouter.get("/:id", authenticateManagerAndMechanic, async (req, res) => {
