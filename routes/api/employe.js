@@ -2,8 +2,9 @@ import { Router } from "express";
 import Employe from "../../models/Employe.js";
 import Response, { Status } from "../../models/app/Response.js";
 import { getEmployeSkills } from "../../services/api/employe/index.js";
-import { authenticateManager, authenticateMechanic } from "../../middleware/authMiddleware.js";
+import { authenticateManager, authenticateManagerAndMechanic, authenticateMechanic } from "../../middleware/authMiddleware.js";
 import MyError from "../../models/app/MyError.js";
+import Skill from "../../models/Skill.js";
 
 const employeRouter = Router();
 
@@ -14,8 +15,15 @@ const MESSAGES = {
 };
 
 employeRouter.get("/", authenticateManager, async (req, res) => {
-  const employes = await Employe.find();
+  const employes = await Employe.find().populate("id_user");
   res.status(200).json(new Response("", Status.Ok, employes));
+});
+
+employeRouter.get("/:id", authenticateManagerAndMechanic, async (req, res) => {
+  const { id } = req.params;
+  const employe = await Employe.findById(id).populate("id_user");
+  const skills = await Skill.find();
+  res.status(200).json(new Response("", Status.Ok, { employe, all_skills: skills }));
 });
 
 employeRouter.get("/skills", authenticateMechanic, async (req, res, next) => {
