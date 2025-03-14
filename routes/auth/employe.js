@@ -4,7 +4,7 @@ import { Router } from "express";
 import MyError from "../../models/app/MyError.js";
 import Response, { Status } from "../../models/app/Response.js";
 import User from "../../models/User.js";
-import { registerEmploye } from "../../services/auth/employe.js";
+import { getEmployeByUserId, registerEmploye } from "../../services/auth/employe.js";
 import { formatUser } from "../../services/auth/user.js";
 import { buildToken, buildUser } from "./user.js";
 
@@ -22,8 +22,6 @@ employeAuthRouter.post("/register", async (req, res, next) => {
   try {
     const { user, employe } = req.body;
     const { employe: registeredEmploye, user: registeredUser, role } = await registerEmploye({ user, employe });
-    console.log(registeredEmploye);
-    console.log(role);
     res.json(
       new Response(MESSAGES.USER_REGISTERED, Status.Ok, {
         user: { ...registeredUser, role: { label: role } },
@@ -42,7 +40,7 @@ employeAuthRouter.post("/login", async (req, res, next) => {
     const user = await User.findOne({ email }).populate("role", "label");
     if (!user || !(await compare(password, user.password))) throw new MyError(MESSAGES.INVALID_CREDENTIALS);
     let formattedUser = formatUser(user);
-    const employe = getEmployeByUserId(user._id);
+    const employe = await getEmployeByUserId(user._id);
     res.json(
       new Response(MESSAGES.CONNECTED, Status.Ok, {
         user: buildUser(formattedUser, user.role),
