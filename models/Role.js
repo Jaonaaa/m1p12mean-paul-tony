@@ -16,7 +16,7 @@ const Role = model("Role", RoleSchema);
 export const ROLES = {
   MANAGER: "manager",
   CLIENT: "client",
-  MECANICIEN: "mécanicien",
+  MECANICIEN: "mechanic",
 };
 
 export default Role;

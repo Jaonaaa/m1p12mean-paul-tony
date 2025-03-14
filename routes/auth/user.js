@@ -21,9 +21,9 @@ const MESSAGES = {
   CONNECTED: "Connecté",
 };
 
-const buildToken = (user, role) => jsonwebtoken.sign({ ...user, role }, JWT_KEY, { expiresIn: "1d" });
+export const buildToken = (user, role) => jsonwebtoken.sign({ ...user, role }, JWT_KEY, { expiresIn: "1d" });
 
-const buildUser = (user, role) => {
+export const buildUser = (user, role) => {
   return { ...user, picture: getCloudinaryUrl(user.picture, { width: 200, height: 200 }), role: { label: role.label } };
 };
 
