@@ -26,7 +26,7 @@ employeAuthRouter.post("/register", async (req, res, next) => {
       new Response(MESSAGES.USER_REGISTERED, Status.Ok, {
         user: { ...registeredUser, role: { label: role } },
         employe: registeredEmploye,
-        token: buildToken(registeredUser, role),
+        token: buildToken(registeredUser, { label: role }),
       })
     );
   } catch (error) {
