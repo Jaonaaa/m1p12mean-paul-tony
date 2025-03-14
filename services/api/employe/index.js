@@ -16,7 +16,6 @@ export async function getAllEmployes() {
 
 export async function getEmployeSkills({ userId }) {
   const employe = await Employe.findOne({ id_user: userId }).populate("skills");
-  console.log(employe);
   if (!employe) throw new MyError(MESSAGES.EMPLOYE_NOT_FOUND);
   return employe.skills;
 }
