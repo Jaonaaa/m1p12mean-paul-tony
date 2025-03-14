@@ -50,9 +50,11 @@ const authenticateToken = (req, res, next) => {
 const authenticateManager = (req, res, next) => {
   verifyToken(req, res, next, (role) => role.label === ROLES.MANAGER, MANAGER_ROLE_REQUIRED);
 };
-
+const authenticateManagerAndMechanic = (req, res, next) => {
+  verifyToken(req, res, next, (role) => role.label === ROLES.MANAGER || role.label === ROLES.MECANICIEN, NOT_AUTHORIZED);
+};
 const authenticateMechanic = (req, res, next) => {
   verifyToken(req, res, next, (role) => role.label === ROLES.MECANICIEN, MECHANIC_ROLE_REQUIRED);
 };
 
-export { authenticateToken, authenticateManager, authenticateMechanic };
+export { authenticateToken, authenticateManager, authenticateMechanic, authenticateManagerAndMechanic };
