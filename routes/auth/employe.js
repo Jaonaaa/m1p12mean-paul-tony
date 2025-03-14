@@ -1,12 +1,9 @@
-import { compare } from "bcrypt";
 import dotenv from "dotenv";
 import { Router } from "express";
-import MyError from "../../models/app/MyError.js";
 import Response, { Status } from "../../models/app/Response.js";
-import User from "../../models/User.js";
-import { getEmployeByUserId, registerEmploye } from "../../services/auth/employe.js";
-import { formatUser } from "../../services/auth/user.js";
-import { buildToken, buildUser } from "./user.js";
+import { registerEmploye } from "../../services/auth/employe.js";
+import { buildToken } from "./user.js";
+import { authenticateManager } from "../../middleware/authMiddleware.js";
 
 dotenv.config();
 
@@ -14,10 +11,9 @@ const employeAuthRouter = Router();
 
 const MESSAGES = {
   USER_REGISTERED: "Employé enregistré",
-  CONNECTED: "Connecté",
 };
 
-employeAuthRouter.post("/register", async (req, res, next) => {
+employeAuthRouter.post("/register", authenticateManager, async (req, res, next) => {
   try {
     const { user, employe } = req.body;
     const { employe: registeredEmploye, user: registeredUser, role } = await registerEmploye({ user, employe });
