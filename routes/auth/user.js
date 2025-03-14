@@ -6,7 +6,9 @@ import MyError from "../../models/app/MyError.js";
 import Response, { Status } from "../../models/app/Response.js";
 import User from "../../models/User.js";
 import { getCloudinaryUrl } from "../../services/api/user/upload/index.js";
-import { formatUser, registerUser, validateUser } from "../../services/auth/user.js";
+import { formatUser, login, registerUser, validateUser } from "../../services/auth/user.js";
+import { ROLES } from "../../models/Role.js";
+import { getEmployeByUserId } from "../../services/auth/employe.js";
 
 dotenv.config();
 
@@ -52,16 +54,20 @@ userAuthRouter.post("/register", async (req, res, next) => {
 
 userAuthRouter.post("/login", async (req, res, next) => {
   try {
-    const { email, password } = req.body;
-    const user = await User.findOne({ email }).populate("role", "label");
-    if (!user || !(await compare(password, user.password))) throw new MyError(MESSAGES.INVALID_CREDENTIALS);
-    let formated_user = formatUser(user);
-    res.json(
-      new Response(MESSAGES.CONNECTED, Status.Ok, {
-        user: buildUser(formated_user, user.role),
-        token: buildToken(formated_user, user.role),
-      })
-    );
+    const { user, formated_user } = await login(req.body, MESSAGES.INVALID_CREDENTIALS);
+    const isMechanic = user.role.label === ROLES.MECANICIEN;
+    const employe = isMechanic ? await getEmployeByUserId(user._id) : null;
+
+    const responsePayload = {
+      user: buildUser(formated_user, user.role),
+      token: buildToken(formated_user, user.role),
+    };
+
+    if (isMechanic) {
+      responsePayload.employe = employe;
+    }
+
+    res.json(new Response(MESSAGES.CONNECTED, Status.Ok, responsePayload));
   } catch (error) {
     next(error);
   }

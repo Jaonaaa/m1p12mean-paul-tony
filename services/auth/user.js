@@ -1,4 +1,4 @@
-import { hash } from "bcrypt";
+import { compare, hash } from "bcrypt";
 import MyError from "../../models/app/MyError.js";
 import { ROLES } from "../../models/Role.js";
 import User from "../../models/User.js";
@@ -42,4 +42,12 @@ export function formatUser(user) {
     lastname: user.lastname,
     picture: getCloudinaryUrl(user.picture),
   };
+}
+
+export async function login(data, error_message) {
+  const { email, password } = data;
+  const user = await User.findOne({ email }).populate("role", "label");
+  if (!user || !(await compare(password, user.password))) throw new MyError(error_message);
+  let formated_user = formatUser(user);
+  return { user, formated_user };
 }

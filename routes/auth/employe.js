@@ -13,7 +13,6 @@ dotenv.config();
 const employeAuthRouter = Router();
 
 const MESSAGES = {
-  INVALID_CREDENTIALS: "Email ou mot de passe incorrect",
   USER_REGISTERED: "Employé enregistré",
   CONNECTED: "Connecté",
 };
@@ -27,25 +26,6 @@ employeAuthRouter.post("/register", async (req, res, next) => {
         user: { ...registeredUser, role: { label: role } },
         employe: registeredEmploye,
         token: buildToken(registeredUser, { label: role }),
-      })
-    );
-  } catch (error) {
-    next(new Response(error.message, Status.Error));
-  }
-});
-
-employeAuthRouter.post("/login", async (req, res, next) => {
-  try {
-    const { email, password } = req.body;
-    const user = await User.findOne({ email }).populate("role", "label");
-    if (!user || !(await compare(password, user.password))) throw new MyError(MESSAGES.INVALID_CREDENTIALS);
-    let formattedUser = formatUser(user);
-    const employe = await getEmployeByUserId(user._id);
-    res.json(
-      new Response(MESSAGES.CONNECTED, Status.Ok, {
-        user: buildUser(formattedUser, user.role),
-        employe: employe,
-        token: buildToken(formattedUser, user.role),
       })
     );
   } catch (error) {

@@ -6,6 +6,7 @@ const serviceSchema = new Schema({
   default_duration: { type: Number },
   description: { type: String },
   required_skills: [{ type: Schema.Types.ObjectId, ref: "Skill" }],
+  category: { type: Schema.Types.ObjectId, ref: "ServiceCategories" },
 });
 
 export default model("Service", serviceSchema);
