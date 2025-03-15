@@ -20,10 +20,20 @@ import { ROLES } from "../models/Role.js";
 
 const NOT_AUTHORIZED = { message: "Accès refusé: sorry bro" };
 const INVALID_TOKEN = { message: "Token invalide" };
-const MANAGER_ROLE_REQUIRED = { message: "Accès refusé: rôle de manager requis" };
-const MECHANIC_ROLE_REQUIRED = { message: "Accès refusé: rôle de mécanicien requis" };
+const MANAGER_ROLE_REQUIRED = {
+  message: "Accès refusé: rôle de manager requis",
+};
+const MECHANIC_ROLE_REQUIRED = {
+  message: "Accès refusé: rôle de mécanicien requis",
+};
 
-const verifyToken = (req, res, next, roleCheck, roleErrorMessage = NOT_AUTHORIZED) => {
+const verifyToken = (
+  req,
+  res,
+  next,
+  roleCheck,
+  roleErrorMessage = NOT_AUTHORIZED
+) => {
   const token = req.header("Authorization")?.split(" ")[1];
   if (!token) return res.status(401).json(NOT_AUTHORIZED);
 
@@ -48,13 +58,36 @@ const authenticateToken = (req, res, next) => {
 };
 
 const authenticateManager = (req, res, next) => {
-  verifyToken(req, res, next, (role) => role.label === ROLES.MANAGER, MANAGER_ROLE_REQUIRED);
+  verifyToken(
+    req,
+    res,
+    next,
+    (role) => role.label === ROLES.MANAGER,
+    MANAGER_ROLE_REQUIRED
+  );
 };
 const authenticateManagerAndMechanic = (req, res, next) => {
-  verifyToken(req, res, next, (role) => role.label === ROLES.MANAGER || role.label === ROLES.MECANICIEN, NOT_AUTHORIZED);
+  verifyToken(
+    req,
+    res,
+    next,
+    (role) => role.label === ROLES.MANAGER || role.label === ROLES.MECANICIEN,
+    NOT_AUTHORIZED
+  );
 };
 const authenticateMechanic = (req, res, next) => {
-  verifyToken(req, res, next, (role) => role.label === ROLES.MECANICIEN, MECHANIC_ROLE_REQUIRED);
+  verifyToken(
+    req,
+    res,
+    next,
+    (role) => role.label === ROLES.MECANICIEN,
+    MECHANIC_ROLE_REQUIRED
+  );
 };
 
-export { authenticateToken, authenticateManager, authenticateMechanic, authenticateManagerAndMechanic };
+export {
+  authenticateToken,
+  authenticateManager,
+  authenticateMechanic,
+  authenticateManagerAndMechanic,
+};
