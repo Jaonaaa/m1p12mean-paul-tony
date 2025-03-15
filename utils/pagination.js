@@ -11,7 +11,13 @@ import MyError from "../models/app/MyError.js";
  * @returns {Promise<Object>} The paginated results.
  * @throws {MyError} If an error occurs during pagination.
  */
-export const paginate = async (Model, page = 1, limit = 10, filter = {}, populate) => {
+export const paginate = async (
+  Model,
+  page = 1,
+  limit = 10,
+  filter = {},
+  populate
+) => {
   try {
     if (page < 1) page = 1;
     if (limit < 1) limit = 10;
