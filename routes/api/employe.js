@@ -17,7 +17,7 @@ const MESSAGES = {
 
 employeRouter.get("/", authenticateManager, async (req, res) => {
   const { page = 1, limit = 10 } = req.query;
-  let { data: employes, totalPages } = await paginate(Employe, page, limit, {}, "id_user");
+  let { data: employes, totalPages } = await paginate(Employe, page, limit, {}, ["id_user", "skills"]);
   employes = formatEmployes(employes);
   res.status(200).json(new Response("", Status.Ok, { employes, totalPages, page: parseInt(page), limit: parseInt(limit) }));
 });
