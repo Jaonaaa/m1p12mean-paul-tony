@@ -1,5 +1,6 @@
 import MyError from "../../../models/app/MyError.js";
 import Employe from "../../../models/Employe.js";
+import { getCloudinaryUrl } from "../user/upload/index.js";
 
 const MESSAGES = {
   EMPLOYE_NOT_FOUND: "Employé non trouvé",
@@ -18,4 +19,12 @@ export async function getEmployeSkills({ userId }) {
   const employe = await Employe.findOne({ id_user: userId }).populate("skills");
   if (!employe) throw new MyError(MESSAGES.EMPLOYE_NOT_FOUND);
   return employe.skills;
+}
+
+export function formatEmployes(employes) {
+  return employes.map((employe) => {
+    const url_user_picture = getCloudinaryUrl(employe.id_user.picture);
+    employe.id_user.picture = url_user_picture;
+    return employe;
+  });
 }

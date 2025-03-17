@@ -1,7 +1,7 @@
 import { Router } from "express";
 import Employe from "../../models/Employe.js";
 import Response, { Status } from "../../models/app/Response.js";
-import { getEmployeSkills } from "../../services/api/employe/index.js";
+import { formatEmployes, getEmployeSkills } from "../../services/api/employe/index.js";
 import { authenticateManager, authenticateManagerAndMechanic, authenticateMechanic } from "../../middleware/authMiddleware.js";
 import MyError from "../../models/app/MyError.js";
 import Skill from "../../models/Skill.js";
@@ -17,7 +17,8 @@ const MESSAGES = {
 
 employeRouter.get("/", authenticateManager, async (req, res) => {
   const { page = 1, limit = 10 } = req.query;
-  const { data: employes, totalPages } = await paginate(Employe, page, limit, {}, "id_user");
+  let { data: employes, totalPages } = await paginate(Employe, page, limit, {}, "id_user");
+  employes = formatEmployes(employes);
   res.status(200).json(new Response("", Status.Ok, { employes, totalPages, page: parseInt(page), limit: parseInt(limit) }));
 });
 
