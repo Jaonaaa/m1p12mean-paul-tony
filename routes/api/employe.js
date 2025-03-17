@@ -24,7 +24,7 @@ employeRouter.get("/", authenticateManager, async (req, res) => {
 
 employeRouter.get("/:id", authenticateManagerAndMechanic, async (req, res) => {
   const { id } = req.params;
-  const employe = await Employe.findById(id).populate("id_user");
+  const employe = await Employe.findById(id).populate(["id_user", "skills"]);
   const skills = await Skill.find();
   res.status(200).json(new Response("", Status.Ok, { employe, all_skills: skills }));
 });
