@@ -2,6 +2,7 @@ import { Router } from "express";
 import TypeVehicle from "../../models/TypeVehicle.js";
 import Response, { Status } from "../../models/app/Response.js";
 import MyError from "../../models/app/MyError.js";
+import { paginate } from "../../utils/pagination.js";
 
 const typeVehicleRouter = Router();
 
@@ -26,8 +27,9 @@ typeVehicleRouter.post("/", async (req, res, next) => {
 
 typeVehicleRouter.get("/", async (req, res, next) => {
   try {
-    const typeVehicles = await TypeVehicle.find();
-    res.status(200).json(new Response("", Status.Ok, typeVehicles));
+    const { page = 1, limit = 10 } = req.query;
+    const { data: types, totalPages } = await paginate(TypeVehicle, page, limit);
+    res.status(200).json(new Response("", Status.Ok, { types, totalPages, page: parseInt(page), limit: parseInt(limit) }));
   } catch (error) {
     next(new Response(error.message, Status.Error));
   }
