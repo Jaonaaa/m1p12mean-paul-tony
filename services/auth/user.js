@@ -31,6 +31,7 @@ export async function registerUser(user, role = ROLES.CLIENT) {
 
   const new_user = new User({ ...userData, password: hashedPassword, role: clientRole._id });
   const saved_user = await new_user.save();
+
   return { user: formatUser(saved_user), role: clientRole.label };
 }
 

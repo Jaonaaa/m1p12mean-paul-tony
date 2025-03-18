@@ -1,14 +1,13 @@
-import { compare } from "bcrypt";
 import dotenv from "dotenv";
 import { Router } from "express";
 import jsonwebtoken from "jsonwebtoken";
 import MyError from "../../models/app/MyError.js";
 import Response, { Status } from "../../models/app/Response.js";
-import User from "../../models/User.js";
-import { getCloudinaryUrl } from "../../services/api/user/upload/index.js";
-import { formatUser, login, registerUser, validateUser } from "../../services/auth/user.js";
 import { ROLES } from "../../models/Role.js";
+import { getCloudinaryUrl } from "../../services/api/user/upload/index.js";
 import { getEmployeByUserId } from "../../services/auth/employe.js";
+import { login, registerUser, validateUser } from "../../services/auth/user.js";
+import { sendEmail } from "../../services/email/index.js";
 
 dotenv.config();
 
@@ -41,6 +40,7 @@ userAuthRouter.post("/register", async (req, res, next) => {
   try {
     validateUser(req.body);
     const { user, role } = await registerUser(req.body);
+    sendEmail(user.email, `${user.firstname} ${user.lastname}`);
     res.status(201).json(
       new Response(MESSAGES.USER_REGISTERED, Status.Ok, {
         user: { ...user, role: { label: role } },
