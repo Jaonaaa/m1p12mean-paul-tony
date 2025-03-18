@@ -39,7 +39,7 @@ employeRouter.get("/skills", authenticateMechanic, async (req, res, next) => {
   }
 });
 
-employeRouter.put("/skills", authenticateMechanic, async (req, res, next) => {
+employeRouter.put("/skills", authenticateManagerAndMechanic, async (req, res, next) => {
   try {
     const { id_employe } = req.body;
     if (!req.body.skills) throw new MyError(MESSAGES.SKILLS_REQUIRED, 400);
