@@ -19,7 +19,6 @@ skillRouter.get("/", async (req, res) => {
 
 skillRouter.put("/:id", async (req, res) => {
   const skill = await Skill.findByIdAndUpdate(req.params.id, req.body, { new: true });
-
   res.status(201).json(new Response("", Status.Ok, skill));
 });
 
