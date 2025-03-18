@@ -2,6 +2,7 @@ import { Router } from "express";
 import ServiceCategories from "../../models/Service_Categories.js";
 import MyError from "../../models/app/MyError.js";
 import Response, { Status } from "../../models/app/Response.js";
+import { paginate } from "../../utils/pagination.js";
 
 const serviceCategoriesRouter = Router();
 
@@ -25,8 +26,9 @@ serviceCategoriesRouter.post("/", async (req, res, next) => {
 
 serviceCategoriesRouter.get("/", async (req, res, next) => {
   try {
-    const categories = await ServiceCategories.find();
-    res.status(200).json(new Response(null, Status.Ok, categories));
+    const { page = 1, limit = 10 } = req.query;
+    const { data: categories, totalPages } = await paginate(ServiceCategories, page, limit);
+    res.status(200).json(new Response("", Status.Ok, { categories, totalPages, page: parseInt(page), limit: parseInt(limit) }));
   } catch (error) {
     next(new Response(error.message, Status.Error));
   }
