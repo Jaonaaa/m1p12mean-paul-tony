@@ -6,6 +6,7 @@ const devisSchema = new Schema({
   price_total: { type: Number },
   created_at: { type: Date },
   status: { type: String },
+  id_vehicle: { type: Schema.Types.ObjectId, ref: "ClientVehicle" },
 });
 
 export default model("Devis", devisSchema);
