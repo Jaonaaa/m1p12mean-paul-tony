@@ -9,6 +9,9 @@ import employeWorkTimeRouter from "./employe_work_time.js";
 import servicesDetailsInDevisRouter from "./services_details_in_devis.js";
 import skillRouter from "./skill.js";
 import serviceCategoriesRouter from "./service_categories.js";
+import brandVehicleRouter from "./brand_vehicle.js";
+import typeVehicleRouter from "./type_vehicle.js";
+import clientVehicleRouter from "./client_vehicle.js";
 
 const apiRouter = express.Router();
 
@@ -22,5 +25,8 @@ apiRouter.use("/employe", employeRouter);
 apiRouter.use("/employe_work_time", employeWorkTimeRouter);
 apiRouter.use("/services_details_in_devis", servicesDetailsInDevisRouter);
 apiRouter.use("/service_categories", serviceCategoriesRouter);
+apiRouter.use("/brand_vehicle", brandVehicleRouter);
+apiRouter.use("/type_vehicle", typeVehicleRouter);
+apiRouter.use("/client_vehicle", clientVehicleRouter);
 
 export default apiRouter;
