@@ -3,6 +3,7 @@ import Service from "../../models/Service.js";
 import Response, { Status } from "../../models/app/Response.js";
 import { insertService } from "../../services/api/service/index.js";
 import { paginate } from "../../utils/pagination.js";
+import MyError from "../../models/app/MyError.js";
 
 const serviceRouter = Router();
 
@@ -10,6 +11,8 @@ const MESSAGES = {
   SERVICE_CREATED: "Service créé avec succès",
   SERVICE_UPDATED: "Service mis à jour avec succès",
   SERVICE_DELETED: "Service supprimé",
+  ID_NOT_FOUND: "ID introuvable",
+  SKILLS_REQUIRED: "Compétences requises",
 };
 
 serviceRouter.post("/", async (req, res, next) => {
@@ -21,6 +24,7 @@ serviceRouter.post("/", async (req, res, next) => {
     next(new Response(error.message, Status.Error));
   }
 });
+
 serviceRouter.get("/", async (req, res, next) => {
   try {
     const { page = 1, limit = 10 } = req.query;
@@ -31,23 +35,46 @@ serviceRouter.get("/", async (req, res, next) => {
   }
 });
 
-serviceRouter.get("/", async (req, res) => {
-  const services = await Service.find();
-  res.status(200).json(new Response("", Status.Ok, services));
+serviceRouter.get("/:id", async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    if (!id) throw new MyError(MESSAGES.ID_NOT_FOUND, 400);
+    const service = await Service.findById(id).populate(["required_skills", "category"]);
+    res.status(200).json(new Response("", Status.Ok, service));
+  } catch (error) {
+    next(new Response(error.message, Status.Error));
+  }
 });
 
-serviceRouter.put("/:id", async (req, res) => {
-  const service = await Service.findByIdAndUpdate(req.params.id, req.body, { new: true });
-  res.status(201).json(new Response(MESSAGES.SERVICE_UPDATED, Status.Ok, service));
+serviceRouter.put("/:id/skills", async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { skills } = req.body;
+
+    if (!skills) throw new MyError(MESSAGES.SKILLS_REQUIRED, 400);
+    const service = await Service.findById(id);
+    service.required_skills = skills; // Update skills
+    let updatedSkills = await service.save();
+    updatedSkills = await updatedSkills.populate("required_skills");
+    res.status(201).json(new Response(MESSAGES.SERVICE_UPDATED, Status.Ok, updatedSkills));
+  } catch (error) {
+    next(new Response(error.message, Status.Error));
+  }
 });
 
-serviceRouter.delete("/:id", async (req, res) => {
-  await Service.findByIdAndDelete(req.params.id);
-  res.status(201).json(new Response(MESSAGES.SERVICE_DELETED, Status.Ok));
+serviceRouter.delete("/:id", async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    if (!id) throw new MyError(MESSAGES.ID_NOT_FOUND, 400);
+    await Service.findByIdAndDelete(id);
+    res.status(201).json(new Response(MESSAGES.SERVICE_DELETED, Status.Ok));
+  } catch (error) {
+    next(new Response(error.message, Status.Error));
+  }
 });
 
 export const findService = async (label) => {
-  return await Service.findOne({ label: label }).select("label");
+  return await Service.findOne({ label }).select("label");
 };
 
 export default serviceRouter;
