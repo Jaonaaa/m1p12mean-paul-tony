@@ -6,6 +6,7 @@ const clientVehicleSchema = new Schema({
   id_client: { type: Schema.Types.ObjectId, ref: "User" },
   registration_number: { type: String },
   year: { type: Number },
+  model: { type: String, required: true },
 });
 
 export default model("ClientVehicle", clientVehicleSchema);

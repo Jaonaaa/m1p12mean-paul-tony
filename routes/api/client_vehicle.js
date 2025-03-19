@@ -17,11 +17,11 @@ const MESSAGES = {
 
 clientVehicleRouter.post("/", async (req, res, next) => {
   try {
-    const { id_type_vehicle, id_brand_vehicle, id_client, registration_number, year } = req.body;
-    if (!id_type_vehicle || !id_brand_vehicle || !id_client || !registration_number || !year) {
+    const { id_type_vehicle, id_brand_vehicle, id_client, registration_number, year, model } = req.body;
+    if (!id_type_vehicle || !id_brand_vehicle || !id_client || !registration_number || !year || !model) {
       throw new MyError(MESSAGES.ALL_FIELDS_REQUIRED, 400);
     }
-    const newClientVehicle = new ClientVehicle({ id_type_vehicle, id_brand_vehicle, id_client, registration_number, year });
+    const newClientVehicle = new ClientVehicle({ ...req.body });
     const savedClientVehicle = await newClientVehicle.save();
     res.status(201).json(new Response(MESSAGES.CLIENT_VEHICLE_CREATED, Status.Ok, savedClientVehicle));
   } catch (error) {
