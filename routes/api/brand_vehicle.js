@@ -11,6 +11,7 @@ const MESSAGES = {
   BRAND_VEHICLE_UPDATED: "Marque de véhicule mise à jour avec succès",
   BRAND_VEHICLE_DELETED: "Marque de véhicule supprimée",
   ID_NOT_FOUND: "ID introuvable",
+  REQUIRED_LABEL: "Le label est requis",
 };
 
 brandVehicleRouter.post("/", async (req, res, next) => {
@@ -51,7 +52,7 @@ brandVehicleRouter.put("/:id", async (req, res, next) => {
   try {
     const { id } = req.params;
     const { label } = req.body;
-    if (!label) throw new MyError("Le label est requis", 400);
+    if (!label) throw new MyError(MESSAGES.REQUIRED_LABEL, 400);
     const updatedBrandVehicle = await BrandVehicle.findByIdAndUpdate(id, { label }, { new: true });
     if (!updatedBrandVehicle) throw new MyError(MESSAGES.ID_NOT_FOUND, 404);
     res.status(200).json(new Response(MESSAGES.BRAND_VEHICLE_UPDATED, Status.Ok, updatedBrandVehicle));
