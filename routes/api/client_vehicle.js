@@ -25,7 +25,7 @@ clientVehicleRouter.post("/", async (req, res, next) => {
     const savedClientVehicle = await newClientVehicle.save();
     res.status(201).json(new Response(MESSAGES.CLIENT_VEHICLE_CREATED, Status.Ok, savedClientVehicle));
   } catch (error) {
-    next(new Response(error.message, Status.Error));
+    next(error);
   }
 });
 
@@ -40,7 +40,7 @@ clientVehicleRouter.get("/", async (req, res, next) => {
     vehicles.forEach((vehicle) => formatClientVehicle(vehicle));
     res.status(200).json(new Response("", Status.Ok, { vehicles, totalPages, page: parseInt(page), limit: parseInt(limit) }));
   } catch (error) {
-    next(new Response(error.message, Status.Error));
+    next(error);
   }
 });
 
@@ -53,7 +53,7 @@ clientVehicleRouter.get("/user/:userId", async (req, res, next) => {
     ).map((vehicle) => formatClientVehicle(vehicle));
     res.status(200).json(new Response("", Status.Ok, clientVehicles));
   } catch (error) {
-    next(new Response(error.message, Status.Error));
+    next(error);
   }
 });
 
@@ -72,7 +72,7 @@ clientVehicleRouter.put("/:id", async (req, res, next) => {
     if (!updatedClientVehicle) throw new MyError(MESSAGES.ID_NOT_FOUND, 404);
     res.status(200).json(new Response(MESSAGES.CLIENT_VEHICLE_UPDATED, Status.Ok, updatedClientVehicle));
   } catch (error) {
-    next(new Response(error.message, Status.Error));
+    next(error);
   }
 });
 
@@ -84,7 +84,7 @@ clientVehicleRouter.delete("/:id", async (req, res, next) => {
     if (!deletedClientVehicle) throw new MyError(MESSAGES.ID_NOT_FOUND, 404);
     res.status(200).json(new Response(MESSAGES.CLIENT_VEHICLE_DELETED, Status.Ok));
   } catch (error) {
-    next(new Response(error.message, Status.Error));
+    next(error);
   }
 });
 
