@@ -1,4 +1,5 @@
 import Devis, { STATUS_DEVIS } from "../../../models/Devis.js";
+import { createServicesDetails, getDevisDurationFromService } from "./service_details.js";
 
 const MESSAGES = {
   SERVICES_REQUIRED: "Le devis doit inclure au moins un service.",
@@ -21,14 +22,20 @@ const MESSAGES = {
  * @returns {Promise<Object>}
  * @throws {Error}
  */
-const createDevis = async (devisData) => {
+export const createDevis = async (devisData) => {
   try {
     checkDevis(devisData);
-    let devis = formatNewDevis(devisData);
-    const newDevis = new Devis(...devis);
+    const devis = formatNewDevis(devisData);
+    const detailsServices = await createServicesDetails(devisData.services);
+    const durationHour = getDevisDurationFromService(detailsServices);
+
+    devis.services_details = detailsServices;
+    devis.expected_duration = durationHour;
+
+    const newDevis = new Devis(devis);
     const savedDevis = await newDevis.save();
-    // calculate expected duration and end
-    // create the work associated with the devis
+
+    // Create the work when the devis begin
     return savedDevis;
   } catch (error) {
     throw new Error(`Erreur lors de la création du devis : ${error.message}`);
@@ -55,7 +62,6 @@ const checkDevis = async (devisData) => {
 
 const formatNewDevis = (devisData) => {
   return {
-    services: devisData.services,
     id_client: devisData.id_client,
     price_total: devisData.price_total,
     created_at: new Date(),
