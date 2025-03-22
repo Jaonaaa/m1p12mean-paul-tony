@@ -22,13 +22,6 @@ employeRouter.get("/", authenticateManager, async (req, res) => {
   res.status(200).json(new Response("", Status.Ok, { employes, totalPages, page: parseInt(page), limit: parseInt(limit) }));
 });
 
-employeRouter.get("/:id", authenticateManagerAndMechanic, async (req, res) => {
-  const { id } = req.params;
-  const employe = await Employe.findById(id).populate(["id_user", "skills"]);
-  const skills = await Skill.find();
-  res.status(200).json(new Response("", Status.Ok, { employe, all_skills: skills }));
-});
-
 employeRouter.get("/skills", authenticateMechanic, async (req, res, next) => {
   try {
     const { _id } = req.user;
@@ -37,6 +30,13 @@ employeRouter.get("/skills", authenticateMechanic, async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+});
+
+employeRouter.get("/:id", authenticateManagerAndMechanic, async (req, res) => {
+  const { id } = req.params;
+  const employe = await Employe.findById(id).populate(["id_user", "skills"]);
+  const skills = await Skill.find();
+  res.status(200).json(new Response("", Status.Ok, { employe, all_skills: skills }));
 });
 
 employeRouter.put("/skills", authenticateManagerAndMechanic, async (req, res, next) => {

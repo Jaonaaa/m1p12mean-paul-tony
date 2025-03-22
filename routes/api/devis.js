@@ -1,32 +1,52 @@
 import { Router } from "express";
+import { authenticateManager } from "../../middleware/authMiddleware.js";
 import Devis from "../../models/Devis.js";
 import Response, { Status } from "../../models/app/Response.js";
+import createDevis from "../../services/api/devis/client.js";
+import { paginate } from "../../utils/pagination.js";
+import { formatClientInDevis } from "../../services/api/devis/index.js";
 
 const devisRouter = Router();
 
-devisRouter.post("/", async (req, res) => {
-  const devis = new Devis(req.body);
-  await devis.save();
-  res.status(201).json(new Response("", Status.Ok, devis));
+const devisPopulate = [
+  {
+    path: "services_details",
+    populate: {
+      path: "service",
+    },
+  },
+  "id_client",
+  "id_vehicle",
+];
+devisRouter.post("/", async (req, res, next) => {
+  try {
+    const newDevis = await createDevis(req.body);
+    res.status(201).json(new Response("Devis créer avec succes", Status.Ok, newDevis));
+  } catch (error) {
+    next(error);
+  }
 });
 
-devisRouter.get("/", async (req, res) => {
-  const devis = await Devis.find();
-  res.status(200).json(new Response("", Status.Ok, devis));
+devisRouter.get("/", authenticateManager, async (req, res, next) => {
+  try {
+    const { page = 1, limit = 10 } = req.query;
+    let { data: devis, totalPages } = await paginate(Devis, page, limit, {}, devisPopulate);
+    devis = formatClientInDevis(devis);
+    res.status(200).json(new Response("", Status.Ok, { devis, totalPages, page: parseInt(page), limit: parseInt(limit) }));
+  } catch (error) {
+    next(error);
+  }
 });
-
-devisRouter.put("/:id", async (req, res) => {
-  const devis = await Devis.findByIdAndUpdate(req.params.id, req.body, { new: true });
-  res.status(201).json(new Response("", Status.Ok, devis));
+devisRouter.get("/client", async (req, res, next) => {
+  try {
+    const { _id } = req.user;
+    const { page = 1, limit = 10 } = req.query;
+    let { data: devis, totalPages } = await paginate(Devis, page, limit, { id_client: _id }, devisPopulate);
+    devis = formatClientInDevis(devis);
+    res.status(200).json(new Response("", Status.Ok, { devis, totalPages, page: parseInt(page), limit: parseInt(limit) }));
+  } catch (error) {
+    next(error);
+  }
 });
-
-devisRouter.delete("/:id", async (req, res) => {
-  await Devis.findByIdAndDelete(req.params.id);
-  res.status(201).json(new Response("Devis supprimé", Status.Ok));
-});
-
-export const findDevis = async (id) => {
-  return await Devis.findById(id).populate("services").populate("id_client");
-};
 
 export default devisRouter;
