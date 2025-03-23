@@ -1,4 +1,7 @@
+import MyError from "../../../models/app/MyError.js";
 import Devis, { STATUS_DEVIS } from "../../../models/Devis.js";
+import { convertToGMT, isBeforeNow, isValidDateTime, now } from "../../../utils/date.js";
+import { getTotalPrice } from "../service/index.js";
 import { createServicesDetails, getDevisDurationFromService } from "./service_details.js";
 
 const MESSAGES = {
@@ -7,6 +10,8 @@ const MESSAGES = {
   PRICE_TOTAL_REQUIRED: "Le devis doit inclure le prix total.",
   VEHICLE_ID_REQUIRED: "Le devis doit inclure l'ID du véhicule du client.",
   LABEL_REQUIRED: "Le devis doit inclure le label.",
+  DATE_FORMAT_INCORRECT: "Le format de la date n'est pas correct.",
+  FUTURE_DATE: "La date choisie ne peut pas être antérieure à aujourd'hui.",
 };
 
 /**
@@ -31,6 +36,7 @@ export const createDevis = async (devisData) => {
 
     devis.services_details = detailsServices;
     devis.expected_duration = durationHour;
+    devis.price_total = await getTotalPrice(devisData.services);
 
     const newDevis = new Devis(devis);
     const savedDevis = await newDevis.save();
@@ -49,9 +55,6 @@ const checkDevis = async (devisData) => {
   if (!devisData.id_client) {
     throw new Error(MESSAGES.CLIENT_ID_REQUIRED);
   }
-  if (!devisData.price_total || devisData.price_total < 0) {
-    throw new Error(MESSAGES.PRICE_TOTAL_REQUIRED);
-  }
   if (!devisData.id_vehicle) {
     throw new Error(MESSAGES.VEHICLE_ID_REQUIRED);
   }
@@ -61,14 +64,23 @@ const checkDevis = async (devisData) => {
 };
 
 const formatNewDevis = (devisData) => {
+  const create_at = checkCreateDate(devisData);
+
   return {
     id_client: devisData.id_client,
-    price_total: devisData.price_total,
-    created_at: new Date(),
+    created_at: create_at,
     status: STATUS_DEVIS.PENDING,
     id_vehicle: devisData.id_vehicle,
     label: devisData.label,
   };
+};
+
+const checkCreateDate = (devis) => {
+  const isValid = isValidDateTime(devis.created_at);
+  const created_dateTime = convertToGMT(devis.created_at);
+  if (!isValid) throw new Error(MESSAGES.DATE_FORMAT_INCORRECT);
+  if (isBeforeNow(devis.created_at)) throw new Error(MESSAGES.FUTURE_DATE);
+  return created_dateTime;
 };
 
 export default createDevis;

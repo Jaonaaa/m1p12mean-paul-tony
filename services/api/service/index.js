@@ -48,3 +48,8 @@ const validateServiceData = async ({ label, price, default_duration, required_sk
 
   await Promise.all(skillChecks);
 };
+
+export const getTotalPrice = async (services) => {
+  const prices = await Service.find({ _id: { $in: services } }, { price: 1, _id: 0 });
+  return prices.reduce((sum, service) => sum + service.price, 0);
+};
