@@ -1,6 +1,7 @@
 import MyError from "../../../models/app/MyError.js";
 import Devis, { STATUS_DEVIS } from "../../../models/Devis.js";
-import { convertToGMT, isValidDateTime, now } from "../../../utils/date.js";
+import { convertToGMT, isBeforeNow, isValidDateTime, now } from "../../../utils/date.js";
+import { getTotalPrice } from "../service/index.js";
 import { createServicesDetails, getDevisDurationFromService } from "./service_details.js";
 
 const MESSAGES = {
@@ -35,6 +36,7 @@ export const createDevis = async (devisData) => {
 
     devis.services_details = detailsServices;
     devis.expected_duration = durationHour;
+    devis.price_total = await getTotalPrice(devisData.services);
 
     const newDevis = new Devis(devis);
     const savedDevis = await newDevis.save();
@@ -53,9 +55,6 @@ const checkDevis = async (devisData) => {
   if (!devisData.id_client) {
     throw new Error(MESSAGES.CLIENT_ID_REQUIRED);
   }
-  if (!devisData.price_total || devisData.price_total < 0) {
-    throw new Error(MESSAGES.PRICE_TOTAL_REQUIRED);
-  }
   if (!devisData.id_vehicle) {
     throw new Error(MESSAGES.VEHICLE_ID_REQUIRED);
   }
@@ -69,7 +68,6 @@ const formatNewDevis = (devisData) => {
 
   return {
     id_client: devisData.id_client,
-    price_total: devisData.price_total,
     created_at: create_at,
     status: STATUS_DEVIS.PENDING,
     id_vehicle: devisData.id_vehicle,
@@ -80,9 +78,8 @@ const formatNewDevis = (devisData) => {
 const checkCreateDate = (devis) => {
   const isValid = isValidDateTime(devis.created_at);
   const created_dateTime = convertToGMT(devis.created_at);
-
   if (!isValid) throw new Error(MESSAGES.DATE_FORMAT_INCORRECT);
-  if (now() > created_dateTime) throw new Error(MESSAGES.FUTURE_DATE);
+  if (isBeforeNow(devis.created_at)) throw new Error(MESSAGES.FUTURE_DATE);
   return created_dateTime;
 };
 
