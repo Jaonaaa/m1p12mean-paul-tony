@@ -7,7 +7,10 @@ import { paginate } from "../../utils/pagination.js";
 import { formatClientInDevis } from "../../services/api/devis/index.js";
 
 const devisRouter = Router();
-
+const MESSAGES = {
+  DEVIS_CREATED: "Devis créé avec succès",
+  DEVIS_UPDATED: "Devis mis à jour avec succès",
+};
 const devisPopulate = [
   {
     path: "services_details",
@@ -18,10 +21,11 @@ const devisPopulate = [
   "id_client",
   "id_vehicle",
 ];
+
 devisRouter.post("/", async (req, res, next) => {
   try {
     const newDevis = await createDevis(req.body);
-    res.status(201).json(new Response("Devis créer avec succes", Status.Ok, newDevis));
+    res.status(201).json(new Response(MESSAGES.DEVIS_CREATED, Status.Ok, newDevis));
   } catch (error) {
     next(error);
   }

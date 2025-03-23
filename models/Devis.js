@@ -19,7 +19,6 @@ export const STATUS_DEVIS = {
   PAUSED: "paused",
   COMPLETED: "completed",
   CANCELED: "canceled",
-  WAITING_FOR_REVIEW: "waiting_for_review",
 };
 
 export default model("Devis", devisSchema);

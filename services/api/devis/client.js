@@ -1,4 +1,6 @@
+import MyError from "../../../models/app/MyError.js";
 import Devis, { STATUS_DEVIS } from "../../../models/Devis.js";
+import { convertToGMT, isValidDateTime, now } from "../../../utils/date.js";
 import { createServicesDetails, getDevisDurationFromService } from "./service_details.js";
 
 const MESSAGES = {
@@ -7,6 +9,8 @@ const MESSAGES = {
   PRICE_TOTAL_REQUIRED: "Le devis doit inclure le prix total.",
   VEHICLE_ID_REQUIRED: "Le devis doit inclure l'ID du véhicule du client.",
   LABEL_REQUIRED: "Le devis doit inclure le label.",
+  DATE_FORMAT_INCORRECT: "Le format de la date n'est pas correct.",
+  FUTURE_DATE: "La date choisie ne peut pas être antérieure à aujourd'hui.",
 };
 
 /**
@@ -61,14 +65,25 @@ const checkDevis = async (devisData) => {
 };
 
 const formatNewDevis = (devisData) => {
+  const create_at = checkCreateDate(devisData);
+
   return {
     id_client: devisData.id_client,
     price_total: devisData.price_total,
-    created_at: new Date(),
+    created_at: create_at,
     status: STATUS_DEVIS.PENDING,
     id_vehicle: devisData.id_vehicle,
     label: devisData.label,
   };
+};
+
+const checkCreateDate = (devis) => {
+  const isValid = isValidDateTime(devis.created_at);
+  const created_dateTime = convertToGMT(devis.created_at);
+
+  if (!isValid) throw new Error(MESSAGES.DATE_FORMAT_INCORRECT);
+  if (now() > created_dateTime) throw new Error(MESSAGES.FUTURE_DATE);
+  return created_dateTime;
 };
 
 export default createDevis;
