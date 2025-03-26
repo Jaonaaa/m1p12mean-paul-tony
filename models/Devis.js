@@ -9,6 +9,8 @@ const devisSchema = new Schema({
   id_vehicle: { type: Schema.Types.ObjectId, ref: "ClientVehicle" },
   label: { type: String, required: true },
   expected_duration: { type: Number },
+  replies: [{ type: Schema.Types.ObjectId, ref: "Reply" }],
+  payed: { type: Number, default: 0 },
 });
 
 export const STATUS_DEVIS = {

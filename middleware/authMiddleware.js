@@ -18,7 +18,7 @@ import { ROLES } from "../models/Role.js";
  * @property {number} exp
  */
 
-const NOT_AUTHORIZED = { message: "Accès refusé: sorry bro" };
+const NOT_AUTHORIZED = { message: "Accès refusé" };
 const INVALID_TOKEN = { message: "Token invalide" };
 const MANAGER_ROLE_REQUIRED = {
   message: "Accès refusé: rôle de manager requis",
