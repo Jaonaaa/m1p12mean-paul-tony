@@ -1,10 +1,10 @@
-import MyError from "../../../models/app/MyError.js";
 import Devis, { STATUS_DEVIS } from "../../../models/Devis.js";
-import { convertToGMT, isBeforeNow, isValidDateTime, now } from "../../../utils/date.js";
+import { convertToGMT, isBeforeNow, isValidDateTime } from "../../../utils/date.js";
 import { getTotalPrice } from "../service/index.js";
 import { createServicesDetails, getDevisDurationFromService } from "./service_details.js";
 
 const MESSAGES = {
+  ERROR_ON_DEVIS: "Erreur lors de la création du devis",
   SERVICES_REQUIRED: "Le devis doit inclure au moins un service.",
   CLIENT_ID_REQUIRED: "Le devis doit inclure l'ID du client.",
   PRICE_TOTAL_REQUIRED: "Le devis doit inclure le prix total.",
@@ -12,6 +12,7 @@ const MESSAGES = {
   LABEL_REQUIRED: "Le devis doit inclure le label.",
   DATE_FORMAT_INCORRECT: "Le format de la date n'est pas correct.",
   FUTURE_DATE: "La date choisie ne peut pas être antérieure à aujourd'hui.",
+  QUANTITY_INVALID: "La quantité du service est invalide",
 };
 
 /**
@@ -44,7 +45,7 @@ export const createDevis = async (devisData) => {
     // Create the work when the devis begin
     return savedDevis;
   } catch (error) {
-    throw new Error(`Erreur lors de la création du devis : ${error.message}`);
+    throw new Error(`${MESSAGES.ERROR_ON_DEVIS} : ${error.message}`);
   }
 };
 
@@ -52,6 +53,13 @@ const checkDevis = async (devisData) => {
   if (!devisData.services || devisData.services.length === 0) {
     throw new Error(MESSAGES.SERVICES_REQUIRED);
   }
+
+  for (let i = 0; i < devisData.services.length; i++) {
+    if (+devisData.services[i].quantity <= 0) {
+      throw new Error(MESSAGES.QUANTITY_INVALID);
+    }
+  }
+
   if (!devisData.id_client) {
     throw new Error(MESSAGES.CLIENT_ID_REQUIRED);
   }

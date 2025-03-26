@@ -49,7 +49,9 @@ const validateServiceData = async ({ label, price, default_duration, required_sk
   await Promise.all(skillChecks);
 };
 
-export const getTotalPrice = async (services) => {
-  const prices = await Service.find({ _id: { $in: services } }, { price: 1, _id: 0 });
-  return prices.reduce((sum, service) => sum + service.price, 0);
+export const getTotalPrice = async (servicesQuantity) => {
+  const services_id = servicesQuantity.map((service) => service.id);
+  let services = await Service.find({ _id: { $in: services_id } }, { price: 1, _id: 0 });
+  services = services.map((service, i) => ({ price: service.price * servicesQuantity[i].quantity }));
+  return services.reduce((sum, service) => sum + service.price, 0);
 };

@@ -5,6 +5,7 @@ const servicesDetailsInDevisSchema = new Schema({
   begin_at: { type: Date },
   workers: [{ type: Schema.Types.ObjectId, ref: "EmployeWorkTime" }],
   service: { type: Schema.Types.ObjectId, ref: "Service" },
+  quantity: { type: Number, default: 0 },
 });
 
 export default model("ServicesDetailsInDevis", servicesDetailsInDevisSchema);

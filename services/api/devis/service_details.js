@@ -7,7 +7,7 @@ const MESSAGES = {
 /**
  * Crée les détails des services pour un devis.
  *
- * @param {Array<string>} services - Les IDs des services.
+ * @param {Array<any>} services - Les IDs des services.
  * @returns {Promise<Array<Object>>} Les détails des services créés.
  * @throws {Error} Si une erreur se produit lors de la création des détails des services.
  */
@@ -16,8 +16,9 @@ export const createServicesDetails = async (services) => {
     const servicesDetails = services.map((service) => ({
       workers: [],
       begin_at: null,
-      service,
+      service: service.id,
       status: STATUS_DEVIS.PENDING,
+      quantity: service.quantity,
     }));
 
     const savedServicesDetails = await Services_details_in_devis.insertMany(servicesDetails);

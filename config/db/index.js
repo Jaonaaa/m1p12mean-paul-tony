@@ -1,11 +1,10 @@
 import { connect } from "mongoose";
 
 const MESSAGES = {
-  CONNECTED: "Connected to database",
-  ERROR: "Error connecting to database",
+  CONNECTED: "Connecté à la base de données",
+  ERROR: "Erreur de connexion à la base de données",
 };
-// MONGO_URI_PROD
-// MONGO_URI
+
 /**
  * @returns {Promise<Mongoose>}
  */
