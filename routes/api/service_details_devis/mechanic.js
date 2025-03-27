@@ -59,7 +59,7 @@ servicesDetailsMechanicRouter.put("/finished", authenticateManagerAndMechanic, a
     });
 
     if (!task_assigned) throw new MyError(MESSAGES.NO_PERMISSION_TO_UPDATE_TASK, 403);
-    // if (task_assigned.status !== STATUS_DEVIS.IN_PROGRESS) throw new MyError(MESSAGES.IS_NOT_STARTED);
+    if (task_assigned.status !== STATUS_DEVIS.IN_PROGRESS) throw new MyError(MESSAGES.IS_NOT_STARTED);
 
     const task = await ServicesDetailsInDevis.findByIdAndUpdate(id_task, { status: STATUS_DEVIS.COMPLETED }, { new: true });
     await updateDevisProgress(task_assigned.id_devis);
