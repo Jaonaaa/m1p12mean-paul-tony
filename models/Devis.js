@@ -15,11 +15,9 @@ const devisSchema = new Schema({
 
 export const STATUS_DEVIS = {
   PENDING: "pending",
-  REFUSED: "rejected",
+  ACCEPTED: "accepted",
   IN_PROGRESS: "in_progress",
-  PAUSED: "paused",
   COMPLETED: "completed",
-  CANCELED: "canceled",
 };
 
 export default model("Devis", devisSchema);

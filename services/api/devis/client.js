@@ -1,3 +1,5 @@
+import MyError from "../../../models/app/MyError.js";
+import ClientVehicle from "../../../models/ClientVehicle.js";
 import Devis, { STATUS_DEVIS } from "../../../models/Devis.js";
 import { convertToGMT, isBeforeNow, isValidDateTime } from "../../../utils/date.js";
 import { getTotalPrice } from "../service/index.js";
@@ -13,6 +15,8 @@ const MESSAGES = {
   DATE_FORMAT_INCORRECT: "Le format de la date n'est pas correct.",
   FUTURE_DATE: "La date choisie ne peut pas être antérieure à aujourd'hui.",
   QUANTITY_INVALID: "La quantité du service est invalide",
+  VEHICLE_NOT_FOUND: "Véhicule non trouvé",
+  WRONG_OWNER: "Ce n'est pas un véhicule de ce client",
 };
 
 /**
@@ -26,11 +30,11 @@ const MESSAGES = {
  * @param {string} devisData.id_vehicle
  * @param {string} devisData.label
  * @returns {Promise<Object>}
- * @throws {Error}
+ * @throws {MyError}
  */
 export const createDevis = async (devisData) => {
   try {
-    checkDevis(devisData);
+    await checkDevis(devisData);
     const devis = formatNewDevis(devisData);
     const detailsServices = await createServicesDetails(devisData.services);
     const durationHour = getDevisDurationFromService(detailsServices);
@@ -45,30 +49,34 @@ export const createDevis = async (devisData) => {
     // Create the work when the devis begin
     return savedDevis;
   } catch (error) {
-    throw new Error(`${MESSAGES.ERROR_ON_DEVIS} : ${error.message}`);
+    throw new MyError(`${MESSAGES.ERROR_ON_DEVIS} : ${error.message}`);
   }
 };
 
 const checkDevis = async (devisData) => {
   if (!devisData.services || devisData.services.length === 0) {
-    throw new Error(MESSAGES.SERVICES_REQUIRED);
+    throw new MyError(MESSAGES.SERVICES_REQUIRED);
   }
 
   for (let i = 0; i < devisData.services.length; i++) {
     if (+devisData.services[i].quantity <= 0) {
-      throw new Error(MESSAGES.QUANTITY_INVALID);
+      throw new MyError(MESSAGES.QUANTITY_INVALID);
     }
   }
 
   if (!devisData.id_client) {
-    throw new Error(MESSAGES.CLIENT_ID_REQUIRED);
+    throw new MyError(MESSAGES.CLIENT_ID_REQUIRED);
   }
   if (!devisData.id_vehicle) {
-    throw new Error(MESSAGES.VEHICLE_ID_REQUIRED);
+    throw new MyError(MESSAGES.VEHICLE_ID_REQUIRED);
   }
   if (!devisData.label) {
-    throw new Error(MESSAGES.LABEL_REQUIRED);
+    throw new MyError(MESSAGES.LABEL_REQUIRED);
   }
+
+  const clientVehicle = await ClientVehicle.findById(devisData.id_vehicle);
+  if (!clientVehicle) throw new MyError(MESSAGES.VEHICLE_NOT_FOUND);
+  if (clientVehicle.id_client != devisData.id_client) throw new MyError(MESSAGES.WRONG_OWNER);
 };
 
 const formatNewDevis = (devisData) => {
@@ -86,8 +94,8 @@ const formatNewDevis = (devisData) => {
 const checkCreateDate = (devis) => {
   const isValid = isValidDateTime(devis.created_at);
   const created_dateTime = convertToGMT(devis.created_at);
-  if (!isValid) throw new Error(MESSAGES.DATE_FORMAT_INCORRECT);
-  if (isBeforeNow(devis.created_at)) throw new Error(MESSAGES.FUTURE_DATE);
+  if (!isValid) throw new MyError(MESSAGES.DATE_FORMAT_INCORRECT);
+  if (isBeforeNow(devis.created_at)) throw new MyError(MESSAGES.FUTURE_DATE);
   return created_dateTime;
 };
 

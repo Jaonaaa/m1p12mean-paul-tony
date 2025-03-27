@@ -1,8 +1,8 @@
 import { Router } from "express";
-import { authenticateManager } from "../../../middleware/authMiddleware.js";
+import { authenticateManager, authenticateManagerAndMechanic } from "../../../middleware/authMiddleware.js";
 import Devis, { STATUS_DEVIS } from "../../../models/Devis.js";
 import Response, { Status } from "../../../models/app/Response.js";
-import { formatClientInDevis, startDevis } from "../../../services/api/devis/index.js";
+import { formatClientInDevis, confirmDevis } from "../../../services/api/devis/index.js";
 import { paginate } from "../../../utils/pagination.js";
 import MyError from "../../../models/app/MyError.js";
 
@@ -24,6 +24,21 @@ const devisPopulate = [
   "id_vehicle",
 ];
 
+const fetchDevisOn = async (req, status) => {
+  const { page = 1, limit = 10 } = req.query;
+  let { data: devis, totalPages } = await paginate(
+    Devis,
+    page,
+    limit,
+    {
+      status: status,
+    },
+    devisPopulate
+  );
+  devis = formatClientInDevis(devis);
+  return { devis, totalPages, page, limit };
+};
+
 /// MANAGER
 devisManagerRouter.get("/", authenticateManager, async (req, res, next) => {
   try {
@@ -38,36 +53,25 @@ devisManagerRouter.get("/", authenticateManager, async (req, res, next) => {
 
 devisManagerRouter.get("/created", authenticateManager, async (req, res, next) => {
   try {
-    const { page = 1, limit = 10 } = req.query;
-    let { data: devis, totalPages } = await paginate(
-      Devis,
-      page,
-      limit,
-      {
-        status: STATUS_DEVIS.PENDING,
-      },
-      devisPopulate
-    );
-    devis = formatClientInDevis(devis);
+    const { devis, limit, page, totalPages } = await fetchDevisOn(req, STATUS_DEVIS.PENDING);
     res.status(200).json(new Response("", Status.Ok, { devis, totalPages, page: parseInt(page), limit: parseInt(limit) }));
   } catch (error) {
     next(error);
   }
 });
 
-devisManagerRouter.get("/started", authenticateManager, async (req, res, next) => {
+devisManagerRouter.get("/accept", authenticateManagerAndMechanic, async (req, res, next) => {
   try {
-    const { page = 1, limit = 10 } = req.query;
-    let { data: devis, totalPages } = await paginate(
-      Devis,
-      page,
-      limit,
-      {
-        status: STATUS_DEVIS.IN_PROGRESS,
-      },
-      devisPopulate
-    );
-    devis = formatClientInDevis(devis);
+    const { devis, limit, page, totalPages } = await fetchDevisOn(req, STATUS_DEVIS.ACCEPTED);
+    res.status(200).json(new Response("", Status.Ok, { devis, totalPages, page: parseInt(page), limit: parseInt(limit) }));
+  } catch (error) {
+    next(error);
+  }
+});
+
+devisManagerRouter.get("/started", authenticateManagerAndMechanic, async (req, res, next) => {
+  try {
+    const { devis, limit, page, totalPages } = await fetchDevisOn(req, STATUS_DEVIS.IN_PROGRESS);
     res.status(200).json(new Response("", Status.Ok, { devis, totalPages, page: parseInt(page), limit: parseInt(limit) }));
   } catch (error) {
     next(error);
@@ -76,29 +80,22 @@ devisManagerRouter.get("/started", authenticateManager, async (req, res, next) =
 
 devisManagerRouter.get("/completed", authenticateManager, async (req, res, next) => {
   try {
-    const { page = 1, limit = 10 } = req.query;
-    let { data: devis, totalPages } = await paginate(
-      Devis,
-      page,
-      limit,
-      {
-        status: STATUS_DEVIS.COMPLETED,
-      },
-      devisPopulate
-    );
     devis = formatClientInDevis(devis);
+    const { devis, limit, page, totalPages } = await fetchDevisOn(req, STATUS_DEVIS.COMPLETED);
     res.status(200).json(new Response("", Status.Ok, { devis, totalPages, page: parseInt(page), limit: parseInt(limit) }));
   } catch (error) {
     next(error);
   }
 });
 
-devisManagerRouter.put("/on/start", authenticateManager, async (req, res, next) => {
+/// ACTION
+
+devisManagerRouter.put("/on/confirm", authenticateManager, async (req, res, next) => {
   try {
     const { id_devis, begin_at } = req.body;
     if (!id_devis || !begin_at) throw new MyError(MESSAGES.INVALID_DATA);
 
-    await startDevis(id_devis, begin_at);
+    await confirmDevis(id_devis, begin_at);
     res.status(200).json(new Response(MESSAGES.STARTED_DEVIS, Status.Ok));
   } catch (error) {
     next(error);
