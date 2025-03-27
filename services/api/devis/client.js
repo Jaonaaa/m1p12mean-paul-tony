@@ -3,7 +3,7 @@ import ClientVehicle from "../../../models/ClientVehicle.js";
 import Devis, { STATUS_DEVIS } from "../../../models/Devis.js";
 import { convertToGMT, isBeforeNow, isValidDateTime } from "../../../utils/date.js";
 import { getTotalPrice } from "../service/index.js";
-import { createServicesDetails, getDevisDurationFromService } from "./service_details.js";
+import { createServicesDetails, getDevisDurationFromService, updateServicesDetails } from "./service_details.js";
 
 const MESSAGES = {
   ERROR_ON_DEVIS: "Erreur lors de la création du devis",
@@ -46,6 +46,7 @@ export const createDevis = async (devisData) => {
     const newDevis = new Devis(devis);
     const savedDevis = await newDevis.save();
 
+    updateServicesDetails(detailsServices, savedDevis._id);
     // Create the work when the devis begin
     return savedDevis;
   } catch (error) {

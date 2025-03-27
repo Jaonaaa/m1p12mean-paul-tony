@@ -5,6 +5,7 @@ import createDevis from "../../../services/api/devis/client.js";
 import { paginate } from "../../../utils/pagination.js";
 import { formatClientInDevis } from "../../../services/api/devis/index.js";
 import { devisPopulate, devisPopulateAll } from "./utils.js";
+import Work from "../../../models/Work.js";
 
 const devisClientRouter = Router();
 
@@ -29,8 +30,11 @@ devisClientRouter.get("/details/:id_devis", async (req, res, next) => {
     const { id_devis } = req.params;
     let devis = await Devis.findById(id_devis).populate(devisPopulateAll);
     if (!devis) throw new MyError(MESSAGES.DEVIS_NOT_FOUND, 404);
-    devis = formatClientInDevis([devis]);
-    res.status(200).json(new Response("", Status.Ok, devis[0]));
+
+    let work = await Work.findOne({ id_devis: devis._id });
+    devis = formatClientInDevis([devis])[0];
+
+    res.status(200).json(new Response("", Status.Ok, { devis: devis, detail: work }));
   } catch (error) {
     next(error);
   }
