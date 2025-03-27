@@ -77,3 +77,13 @@ export function formatClientInDevis(devisArray) {
     return devis;
   });
 }
+
+export async function updateDevisStatus(id_devis, status, status_needed) {
+  const devis = await Devis.findById(id_devis);
+  if (!devis) throw new MyError(MESSAGES.DEVIS_NOT_FOUND);
+  if (devis.status == status_needed) {
+    devis.status = status;
+    return await devis.save();
+  }
+  return devis;
+}

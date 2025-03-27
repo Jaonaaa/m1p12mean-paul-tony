@@ -5,12 +5,14 @@ import Response, { Status } from "../../../models/app/Response.js";
 import { formatClientInDevis, confirmDevis } from "../../../services/api/devis/index.js";
 import { paginate } from "../../../utils/pagination.js";
 import MyError from "../../../models/app/MyError.js";
+import { assignTask } from "../../../services/api/devis/service_details.js";
 
 const devisManagerRouter = Router();
 
 const MESSAGES = {
   INVALID_DATA: "Les données envoyées sont invalides.",
   STARTED_DEVIS: "Devis commencé!",
+  TASK_ASSIGNED: "Tache assigné!",
 };
 
 const devisPopulate = [
@@ -97,6 +99,17 @@ devisManagerRouter.put("/on/confirm", authenticateManager, async (req, res, next
 
     await confirmDevis(id_devis, begin_at);
     res.status(200).json(new Response(MESSAGES.STARTED_DEVIS, Status.Ok));
+  } catch (error) {
+    next(error);
+  }
+});
+
+devisManagerRouter.put("/service/assign", authenticateManager, async (req, res, next) => {
+  try {
+    const { id_service_details, workers } = req.body;
+    if (!id_service_details || !workers) throw new MyError(MESSAGES.INVALID_DATA);
+    await assignTask(id_service_details, workers);
+    res.status(200).json(new Response(MESSAGES.TASK_ASSIGNED, Status.Ok));
   } catch (error) {
     next(error);
   }
