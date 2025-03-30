@@ -57,6 +57,17 @@ clientVehicleRouter.get("/user/:userId", async (req, res, next) => {
   }
 });
 
+clientVehicleRouter.get("/vehicle/:id", async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    if (!id) throw new MyError(MESSAGES.ID_NOT_FOUND, 400);
+    const clientVehicles = await ClientVehicle.findById(id).populate(["id_type_vehicle", "id_brand_vehicle", "id_client"]);
+    res.status(200).json(new Response("", Status.Ok, clientVehicles));
+  } catch (error) {
+    next(error);
+  }
+});
+
 clientVehicleRouter.put("/:id", async (req, res, next) => {
   try {
     const { id } = req.params;
