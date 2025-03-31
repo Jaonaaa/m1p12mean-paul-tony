@@ -6,6 +6,8 @@ import { STATUS_DEVIS } from "../../../models/Devis.js";
 import MyError from "../../../models/app/MyError.js";
 import { updateDevisStatus } from "../../../services/api/devis/index.js";
 import { updateDevisProgress } from "../../../services/api/devis/work/index.js";
+import Employe from "../../../models/Employe.js";
+import { getCompatibleEmp } from "../../../services/api/task/employe.js";
 
 const servicesDetailsMechanicRouter = Router();
 
@@ -64,6 +66,16 @@ servicesDetailsMechanicRouter.put("/finished", authenticateManagerAndMechanic, a
     const task = await ServicesDetailsInDevis.findByIdAndUpdate(id_task, { status: STATUS_DEVIS.COMPLETED }, { new: true });
     await updateDevisProgress(task_assigned.id_devis);
     res.status(201).json(new Response(MESSAGES.SERVICES_DETAILS_UPDATED, Status.Ok, task));
+  } catch (error) {
+    next(error);
+  }
+});
+
+servicesDetailsMechanicRouter.get("/task/service/:id_task/mechanic", authenticateManagerAndMechanic, async (req, res, next) => {
+  try {
+    const { id_task } = req.params;
+    const emp = await getCompatibleEmp(id_task);
+    res.status(201).json(new Response("", Status.Ok, emp));
   } catch (error) {
     next(error);
   }
