@@ -1,7 +1,6 @@
 import MyError from "../../../models/app/MyError.js";
 import Employe from "../../../models/Employe.js";
 import Services_details_in_devis from "../../../models/Services_details_in_devis.js";
-import { formatUser } from "../../auth/user.js";
 import { formatEmployes } from "../employe/index.js";
 
 const MESSAGES = {

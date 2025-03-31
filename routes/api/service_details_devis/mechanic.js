@@ -32,6 +32,35 @@ servicesDetailsMechanicRouter.get("/tasks", authenticateManagerAndMechanic, asyn
   }
 });
 
+servicesDetailsMechanicRouter.get("/tasks/not-started", authenticateManagerAndMechanic, async (req, res, next) => {
+  try {
+    const { id_emp } = req.body;
+    const tasks = await ServicesDetailsInDevis.find({
+      workers: id_emp,
+      status: STATUS_DEVIS.PENDING,
+    })
+      .sort({ begin_at: -1 })
+      .populate(["service", "id_devis"]);
+    res.status(201).json(new Response("", Status.Ok, tasks));
+  } catch (error) {
+    next(error);
+  }
+});
+servicesDetailsMechanicRouter.get("/tasks/started", authenticateManagerAndMechanic, async (req, res, next) => {
+  try {
+    const { id_emp } = req.body;
+    const tasks = await ServicesDetailsInDevis.find({
+      workers: id_emp,
+      status: STATUS_DEVIS.IN_PROGRESS,
+    })
+      .sort({ begin_at: -1 })
+      .populate(["service", "id_devis"]);
+    res.status(201).json(new Response("", Status.Ok, tasks));
+  } catch (error) {
+    next(error);
+  }
+});
+
 servicesDetailsMechanicRouter.put("/start", authenticateManagerAndMechanic, async (req, res, next) => {
   try {
     const { id_emp, id_task } = req.body;
