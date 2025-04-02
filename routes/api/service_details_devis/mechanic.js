@@ -18,6 +18,18 @@ const MESSAGES = {
   IS_NOT_STARTED: "Tache pas encore commencé",
 };
 
+const populateServiceDetails = [
+  "service",
+  "id_devis",
+  {
+    path: "workers",
+    populate: [
+      {
+        path: "skills",
+      },
+    ],
+  },
+];
 servicesDetailsMechanicRouter.get("/tasks", authenticateManagerAndMechanic, async (req, res, next) => {
   try {
     const { id_emp } = req.body;
@@ -25,7 +37,8 @@ servicesDetailsMechanicRouter.get("/tasks", authenticateManagerAndMechanic, asyn
       workers: id_emp,
     })
       .sort({ begin_at: -1 })
-      .populate(["service", "id_devis"]);
+      .populate(populateServiceDetails);
+
     res.status(201).json(new Response("", Status.Ok, tasks));
   } catch (error) {
     next(error);
@@ -40,7 +53,7 @@ servicesDetailsMechanicRouter.get("/tasks/not-started", authenticateManagerAndMe
       status: STATUS_DEVIS.PENDING,
     })
       .sort({ begin_at: -1 })
-      .populate(["service", "id_devis"]);
+      .populate(populateServiceDetails);
     res.status(201).json(new Response("", Status.Ok, tasks));
   } catch (error) {
     next(error);
@@ -54,7 +67,7 @@ servicesDetailsMechanicRouter.get("/tasks/started", authenticateManagerAndMechan
       status: STATUS_DEVIS.IN_PROGRESS,
     })
       .sort({ begin_at: -1 })
-      .populate(["service", "id_devis"]);
+      .populate(populateServiceDetails);
     res.status(201).json(new Response("", Status.Ok, tasks));
   } catch (error) {
     next(error);
@@ -71,7 +84,9 @@ servicesDetailsMechanicRouter.put("/start", authenticateManagerAndMechanic, asyn
     });
     if (!task_assigned) throw new MyError(MESSAGES.NO_PERMISSION_TO_UPDATE_TASK, 403);
 
-    const task = await ServicesDetailsInDevis.findByIdAndUpdate(id_task, { status: STATUS_DEVIS.IN_PROGRESS }, { new: true });
+    const task = await ServicesDetailsInDevis.findByIdAndUpdate(id_task, { status: STATUS_DEVIS.IN_PROGRESS }, { new: true }).populate(
+      populateServiceDetails
+    );
     updateDevisStatus(task_assigned.id_devis, STATUS_DEVIS.IN_PROGRESS, STATUS_DEVIS.ACCEPTED);
 
     res.status(201).json(new Response(MESSAGES.SERVICES_DETAILS_UPDATED, Status.Ok, task));
@@ -92,7 +107,9 @@ servicesDetailsMechanicRouter.put("/finished", authenticateManagerAndMechanic, a
     if (!task_assigned) throw new MyError(MESSAGES.NO_PERMISSION_TO_UPDATE_TASK, 403);
     if (task_assigned.status !== STATUS_DEVIS.IN_PROGRESS) throw new MyError(MESSAGES.IS_NOT_STARTED);
 
-    const task = await ServicesDetailsInDevis.findByIdAndUpdate(id_task, { status: STATUS_DEVIS.COMPLETED }, { new: true });
+    const task = await ServicesDetailsInDevis.findByIdAndUpdate(id_task, { status: STATUS_DEVIS.COMPLETED }, { new: true }).populate(
+      populateServiceDetails
+    );
     await updateDevisProgress(task_assigned.id_devis);
     res.status(201).json(new Response(MESSAGES.SERVICES_DETAILS_UPDATED, Status.Ok, task));
   } catch (error) {
