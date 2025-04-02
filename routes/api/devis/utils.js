@@ -30,6 +30,9 @@ export const devisPopulateAll = [
           {
             path: "skills",
           },
+          {
+            path: "id_user",
+          },
         ],
       },
     ],
