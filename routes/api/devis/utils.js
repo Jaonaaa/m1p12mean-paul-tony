@@ -12,17 +12,27 @@ export const devisPopulate = [
 export const devisPopulateAll = [
   {
     path: "services_details",
-    populate: {
-      path: "service",
-      populate: [
-        {
-          path: "required_skills",
-        },
-        {
-          path: "category",
-        },
-      ],
-    },
+    populate: [
+      {
+        path: "service",
+        populate: [
+          {
+            path: "required_skills",
+          },
+          {
+            path: "category",
+          },
+        ],
+      },
+      {
+        path: "workers",
+        populate: [
+          {
+            path: "skills",
+          },
+        ],
+      },
+    ],
   },
   "id_client",
   {
