@@ -6,6 +6,7 @@ import { paginate } from "../../../utils/pagination.js";
 import { formatClientInDevis } from "../../../services/api/devis/index.js";
 import { devisPopulate, devisPopulateAll } from "./utils.js";
 import Work from "../../../models/Work.js";
+import MyError from "../../../models/app/MyError.js";
 
 const devisClientRouter = Router();
 
