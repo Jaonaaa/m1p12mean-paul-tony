@@ -16,6 +16,7 @@ const MESSAGES = {
   SERVICES_DETAILS_NOT_FOUND: "Détails des services introuvables",
   NO_PERMISSION_TO_UPDATE_TASK: "Vous n'avez pas la permission de modifié cette tache",
   IS_NOT_STARTED: "Tache pas encore commencé",
+  EMPLOYE_NOT_FOUND: "Employé introuvable",
 };
 
 const populateServiceDetails = [
@@ -30,11 +31,14 @@ const populateServiceDetails = [
     ],
   },
 ];
-servicesDetailsMechanicRouter.get("/tasks/emp/:id_emp", authenticateManagerAndMechanic, async (req, res, next) => {
+servicesDetailsMechanicRouter.get("/tasks/", authenticateManagerAndMechanic, async (req, res, next) => {
   try {
-    const { id_emp } = req.params;
+    const { _id } = req.user;
+    const emp = await Employe.findOne({ id_user: _id });
+    if (!emp) throw new MyError(MESSAGES.EMPLOYE_NOT_FOUND);
+
     const tasks = await ServicesDetailsInDevis.find({
-      workers: id_emp,
+      workers: emp._id,
     })
       .sort({ begin_at: -1 })
       .populate(populateServiceDetails);
@@ -45,11 +49,14 @@ servicesDetailsMechanicRouter.get("/tasks/emp/:id_emp", authenticateManagerAndMe
   }
 });
 
-servicesDetailsMechanicRouter.get("/tasks/not-started/:id_emp", authenticateManagerAndMechanic, async (req, res, next) => {
+servicesDetailsMechanicRouter.get("/tasks/not-started", authenticateManagerAndMechanic, async (req, res, next) => {
   try {
-    const { id_emp } = req.params;
+    const { _id } = req.user;
+    const emp = await Employe.findOne({ id_user: _id });
+    if (!emp) throw new MyError(MESSAGES.EMPLOYE_NOT_FOUND);
+
     const tasks = await ServicesDetailsInDevis.find({
-      workers: id_emp,
+      workers: emp._id,
       status: STATUS_DEVIS.PENDING,
     })
       .sort({ begin_at: -1 })
@@ -59,11 +66,13 @@ servicesDetailsMechanicRouter.get("/tasks/not-started/:id_emp", authenticateMana
     next(error);
   }
 });
-servicesDetailsMechanicRouter.get("/tasks/started/:id_emp", authenticateManagerAndMechanic, async (req, res, next) => {
+servicesDetailsMechanicRouter.get("/tasks/started", authenticateManagerAndMechanic, async (req, res, next) => {
   try {
-    const { id_emp } = req.params;
+    const { _id } = req.user;
+    const emp = await Employe.findOne({ id_user: _id });
+    if (!emp) throw new MyError(MESSAGES.EMPLOYE_NOT_FOUND);
     const tasks = await ServicesDetailsInDevis.find({
-      workers: id_emp,
+      workers: emp._id,
       status: STATUS_DEVIS.IN_PROGRESS,
     })
       .sort({ begin_at: -1 })
