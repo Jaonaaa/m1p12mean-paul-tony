@@ -85,10 +85,13 @@ servicesDetailsMechanicRouter.get("/tasks/started", authenticateManagerAndMechan
 
 servicesDetailsMechanicRouter.put("/start", authenticateManagerAndMechanic, async (req, res, next) => {
   try {
-    const { id_emp, id_task } = req.body;
+    const { id_user, id_task } = req.body;
+
+    const emp = await Employe.findOne({ id_user: id_user });
+    if (!emp) throw new MyError(MESSAGES.EMPLOYE_NOT_FOUND);
 
     const task_assigned = await ServicesDetailsInDevis.findOne({
-      workers: id_emp,
+      workers: emp._id,
       _id: id_task,
     });
     if (!task_assigned) throw new MyError(MESSAGES.NO_PERMISSION_TO_UPDATE_TASK, 403);
@@ -106,10 +109,13 @@ servicesDetailsMechanicRouter.put("/start", authenticateManagerAndMechanic, asyn
 
 servicesDetailsMechanicRouter.put("/finished", authenticateManagerAndMechanic, async (req, res, next) => {
   try {
-    const { id_emp, id_task } = req.body;
+    const { id_user, id_task } = req.body;
+
+    const emp = await Employe.findOne({ id_user: id_user });
+    if (!emp) throw new MyError(MESSAGES.EMPLOYE_NOT_FOUND);
 
     const task_assigned = await ServicesDetailsInDevis.findOne({
-      workers: id_emp,
+      workers: emp._id,
       _id: id_task,
     });
 
