@@ -30,17 +30,23 @@ devisClientRouter.post("/", async (req, res, next) => {
 devisClientRouter.get("/details/:id_devis", async (req, res, next) => {
   try {
     const { id_devis } = req.params;
+
     let devis = await Devis.findById(id_devis).populate(devisPopulateAll);
     if (!devis) throw new MyError(MESSAGES.DEVIS_NOT_FOUND, 404);
+
+    console.log(devis);
     devis.services_details = devis.services_details.map((service) =>
       service.workers.map((worker) => {
         worker.id_user = formatUser(worker.id_user);
         return worker;
       })
     );
+    console.log("====================================");
+    console.log(devis);
+    console.log("====================================");
     let work = await Work.findOne({ id_devis: devis._id });
     devis = formatClientInDevis([devis])[0];
-
+    console.log(devis);
     res.status(200).json(new Response("", Status.Ok, { devis: devis, detail: work }));
   } catch (error) {
     next(error);
