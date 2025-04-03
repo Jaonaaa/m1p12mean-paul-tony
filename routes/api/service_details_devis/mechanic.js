@@ -30,9 +30,9 @@ const populateServiceDetails = [
     ],
   },
 ];
-servicesDetailsMechanicRouter.get("/tasks", authenticateManagerAndMechanic, async (req, res, next) => {
+servicesDetailsMechanicRouter.get("/tasks/emp/:id_emp", authenticateManagerAndMechanic, async (req, res, next) => {
   try {
-    const { id_emp } = req.body;
+    const { id_emp } = req.params;
     const tasks = await ServicesDetailsInDevis.find({
       workers: id_emp,
     })
@@ -45,9 +45,9 @@ servicesDetailsMechanicRouter.get("/tasks", authenticateManagerAndMechanic, asyn
   }
 });
 
-servicesDetailsMechanicRouter.get("/tasks/not-started", authenticateManagerAndMechanic, async (req, res, next) => {
+servicesDetailsMechanicRouter.get("/tasks/not-started/:id_emp", authenticateManagerAndMechanic, async (req, res, next) => {
   try {
-    const { id_emp } = req.body;
+    const { id_emp } = req.params;
     const tasks = await ServicesDetailsInDevis.find({
       workers: id_emp,
       status: STATUS_DEVIS.PENDING,
@@ -59,9 +59,9 @@ servicesDetailsMechanicRouter.get("/tasks/not-started", authenticateManagerAndMe
     next(error);
   }
 });
-servicesDetailsMechanicRouter.get("/tasks/started", authenticateManagerAndMechanic, async (req, res, next) => {
+servicesDetailsMechanicRouter.get("/tasks/started/:id_emp", authenticateManagerAndMechanic, async (req, res, next) => {
   try {
-    const { id_emp } = req.body;
+    const { id_emp } = req.params;
     const tasks = await ServicesDetailsInDevis.find({
       workers: id_emp,
       status: STATUS_DEVIS.IN_PROGRESS,
