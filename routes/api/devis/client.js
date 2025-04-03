@@ -3,7 +3,7 @@ import Devis from "../../../models/Devis.js";
 import Response, { Status } from "../../../models/app/Response.js";
 import createDevis from "../../../services/api/devis/client.js";
 import { paginate } from "../../../utils/pagination.js";
-import { formatClientInDevis } from "../../../services/api/devis/index.js";
+import { formatClientInDevis, getDetailsDevis } from "../../../services/api/devis/index.js";
 import { devisPopulate, devisPopulateAll } from "./utils.js";
 import Work from "../../../models/Work.js";
 import MyError from "../../../models/app/MyError.js";
@@ -33,24 +33,21 @@ devisClientRouter.get("/details/:id_devis", async (req, res, next) => {
 
     let devis = await Devis.findById(id_devis).populate(devisPopulateAll);
     if (!devis) throw new MyError(MESSAGES.DEVIS_NOT_FOUND, 404);
-    if (devis.services_details.length > 0) console.log(devis.services_details[0].workers);
 
     devis.services_details = devis.services_details.map((service) =>
       service.workers.map((worker) => {
         console.log(worker);
-        console.log("APRES");
-        worker.id_user = formatUser(worker.id_user);
+        console.log("APRES ||||||||||||||||||||||||||||||||||");
+        let details = { ...worker.id_user };
+        worker.id_user = formatUser(details);
         console.log(worker);
         return worker;
       })
     );
-    console.log("====================================");
-    if (devis.services_details.length > 0) console.log(devis.services_details[0].workers);
-    console.log("====================================");
+
     let work = await Work.findOne({ id_devis: devis._id });
-    if (devis.services_details.length > 0) console.log(devis.services_details[0].workers);
-    console.log(devis.services_details.workers);
-    res.status(200).json(new Response("", Status.Ok, { devis: devis, detail: work }));
+    devis.details = work;
+    res.status(200).json(new Response("", Status.Ok, devis));
   } catch (error) {
     next(error);
   }
@@ -62,6 +59,7 @@ devisClientRouter.get("/client", async (req, res, next) => {
     const { page = 1, limit = 10 } = req.query;
     let { data: devis, totalPages } = await paginate(Devis, page, limit, { id_client: _id }, devisPopulate, { created_at: -1 });
     devis = formatClientInDevis(devis);
+    devis = getDetailsDevis(devis);
     res.status(200).json(new Response("", Status.Ok, { devis, totalPages, page: parseInt(page), limit: parseInt(limit) }));
   } catch (error) {
     next(error);

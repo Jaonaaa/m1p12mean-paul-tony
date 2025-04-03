@@ -2,7 +2,7 @@ import { Router } from "express";
 import { authenticateManager, authenticateManagerAndMechanic } from "../../../middleware/authMiddleware.js";
 import Devis, { STATUS_DEVIS } from "../../../models/Devis.js";
 import Response, { Status } from "../../../models/app/Response.js";
-import { formatClientInDevis, confirmDevis } from "../../../services/api/devis/index.js";
+import { formatClientInDevis, confirmDevis, getDetailsDevis } from "../../../services/api/devis/index.js";
 import { paginate } from "../../../utils/pagination.js";
 import MyError from "../../../models/app/MyError.js";
 import { assignTask } from "../../../services/api/devis/service_details.js";
@@ -47,6 +47,7 @@ devisManagerRouter.get("/", authenticateManager, async (req, res, next) => {
     const { page = 1, limit = 10 } = req.query;
     let { data: devis, totalPages } = await paginate(Devis, page, limit, {}, devisPopulate);
     devis = formatClientInDevis(devis);
+    devis = await getDetailsDevis(devis);
     res.status(200).json(new Response("", Status.Ok, { devis, totalPages, page: parseInt(page), limit: parseInt(limit) }));
   } catch (error) {
     next(error);
@@ -55,7 +56,8 @@ devisManagerRouter.get("/", authenticateManager, async (req, res, next) => {
 
 devisManagerRouter.get("/created", authenticateManager, async (req, res, next) => {
   try {
-    const { devis, limit, page, totalPages } = await fetchDevisOn(req, STATUS_DEVIS.PENDING);
+    let { devis, limit, page, totalPages } = await fetchDevisOn(req, STATUS_DEVIS.PENDING);
+    devis = getDetailsDevis(devis);
     res.status(200).json(new Response("", Status.Ok, { devis, totalPages, page: parseInt(page), limit: parseInt(limit) }));
   } catch (error) {
     next(error);
@@ -64,7 +66,8 @@ devisManagerRouter.get("/created", authenticateManager, async (req, res, next) =
 
 devisManagerRouter.get("/accept", authenticateManagerAndMechanic, async (req, res, next) => {
   try {
-    const { devis, limit, page, totalPages } = await fetchDevisOn(req, STATUS_DEVIS.ACCEPTED);
+    let { devis, limit, page, totalPages } = await fetchDevisOn(req, STATUS_DEVIS.ACCEPTED);
+    devis = getDetailsDevis(devis);
     res.status(200).json(new Response("", Status.Ok, { devis, totalPages, page: parseInt(page), limit: parseInt(limit) }));
   } catch (error) {
     next(error);
@@ -73,7 +76,8 @@ devisManagerRouter.get("/accept", authenticateManagerAndMechanic, async (req, re
 
 devisManagerRouter.get("/started", authenticateManagerAndMechanic, async (req, res, next) => {
   try {
-    const { devis, limit, page, totalPages } = await fetchDevisOn(req, STATUS_DEVIS.IN_PROGRESS);
+    let { devis, limit, page, totalPages } = await fetchDevisOn(req, STATUS_DEVIS.IN_PROGRESS);
+    devis = getDetailsDevis(devis);
     res.status(200).json(new Response("", Status.Ok, { devis, totalPages, page: parseInt(page), limit: parseInt(limit) }));
   } catch (error) {
     next(error);
@@ -82,8 +86,9 @@ devisManagerRouter.get("/started", authenticateManagerAndMechanic, async (req, r
 
 devisManagerRouter.get("/completed", authenticateManager, async (req, res, next) => {
   try {
+    let { devis, limit, page, totalPages } = await fetchDevisOn(req, STATUS_DEVIS.COMPLETED);
     devis = formatClientInDevis(devis);
-    const { devis, limit, page, totalPages } = await fetchDevisOn(req, STATUS_DEVIS.COMPLETED);
+    devis = getDetailsDevis(devis);
     res.status(200).json(new Response("", Status.Ok, { devis, totalPages, page: parseInt(page), limit: parseInt(limit) }));
   } catch (error) {
     next(error);
