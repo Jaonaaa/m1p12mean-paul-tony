@@ -36,11 +36,9 @@ devisClientRouter.get("/details/:id_devis", async (req, res, next) => {
 
     devis.services_details = devis.services_details.map((service) =>
       service.workers.map((worker) => {
-        console.log(worker);
-        console.log("APRES ||||||||||||||||||||||||||||||||||");
-        let details = { ...worker.id_user };
+        let details = worker.id_user;
+        if (!worker.id_user.createdAt) return worker;
         worker.id_user = formatUser(details);
-        console.log(worker);
         return worker;
       })
     );
