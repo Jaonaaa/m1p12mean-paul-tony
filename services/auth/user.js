@@ -36,6 +36,7 @@ export async function registerUser(user, role = ROLES.CLIENT) {
 }
 
 export function formatUser(user) {
+  console.log(user);
   return {
     _id: user._id,
     email: user.email,
