@@ -34,9 +34,13 @@ devisClientRouter.get("/details/:id_devis", async (req, res, next) => {
     let devis = await Devis.findById(id_devis).populate(devisPopulateAll);
     if (!devis) throw new MyError(MESSAGES.DEVIS_NOT_FOUND, 404);
     if (devis.services_details.length > 0) console.log(devis.services_details[0].workers);
+
     devis.services_details = devis.services_details.map((service) =>
       service.workers.map((worker) => {
+        console.log(worker);
+        console.log("APRES");
         worker.id_user = formatUser(worker.id_user);
+        console.log(worker);
         return worker;
       })
     );
