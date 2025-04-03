@@ -11,6 +11,7 @@ const devisSchema = new Schema({
   expected_duration: { type: Number },
   replies: [{ type: Schema.Types.ObjectId, ref: "Reply" }],
   payed: { type: Number, default: 0 },
+  details: { type: Object },
 });
 
 export const STATUS_DEVIS = {

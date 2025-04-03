@@ -1,6 +1,7 @@
 import MyError from "../../../models/app/MyError.js";
 import Devis, { STATUS_DEVIS } from "../../../models/Devis.js";
 import { PAYMENT_METHODS, PAYMENT_STATUSES } from "../../../models/Payment.js";
+import Work from "../../../models/Work.js";
 import { convertToGMT, isBefore } from "../../../utils/date.js";
 import { formatUser } from "../../auth/user.js";
 import { createPayment } from "../payment/index.js";
@@ -84,6 +85,14 @@ export async function updateDevisStatus(id_devis, status, status_needed) {
   if (devis.status == status_needed) {
     devis.status = status;
     return await devis.save();
+  }
+  return devis;
+}
+
+export async function getDetailsDevis(devis) {
+  for (let i = 0; i < devis.length; i++) {
+    let work = await Work.findOne({ id_devis: devis[i]._id });
+    devis[i].details = work;
   }
   return devis;
 }
