@@ -57,7 +57,7 @@ devisManagerRouter.get("/", authenticateManager, async (req, res, next) => {
 devisManagerRouter.get("/created", authenticateManager, async (req, res, next) => {
   try {
     let { devis, limit, page, totalPages } = await fetchDevisOn(req, STATUS_DEVIS.PENDING);
-    devis = getDetailsDevis(devis);
+    devis = await getDetailsDevis(devis);
     res.status(200).json(new Response("", Status.Ok, { devis, totalPages, page: parseInt(page), limit: parseInt(limit) }));
   } catch (error) {
     next(error);
@@ -67,7 +67,7 @@ devisManagerRouter.get("/created", authenticateManager, async (req, res, next) =
 devisManagerRouter.get("/accept", authenticateManagerAndMechanic, async (req, res, next) => {
   try {
     let { devis, limit, page, totalPages } = await fetchDevisOn(req, STATUS_DEVIS.ACCEPTED);
-    devis = getDetailsDevis(devis);
+    devis = await getDetailsDevis(devis);
     res.status(200).json(new Response("", Status.Ok, { devis, totalPages, page: parseInt(page), limit: parseInt(limit) }));
   } catch (error) {
     next(error);
@@ -77,7 +77,7 @@ devisManagerRouter.get("/accept", authenticateManagerAndMechanic, async (req, re
 devisManagerRouter.get("/started", authenticateManagerAndMechanic, async (req, res, next) => {
   try {
     let { devis, limit, page, totalPages } = await fetchDevisOn(req, STATUS_DEVIS.IN_PROGRESS);
-    devis = getDetailsDevis(devis);
+    devis = await getDetailsDevis(devis);
     res.status(200).json(new Response("", Status.Ok, { devis, totalPages, page: parseInt(page), limit: parseInt(limit) }));
   } catch (error) {
     next(error);
@@ -88,7 +88,7 @@ devisManagerRouter.get("/completed", authenticateManager, async (req, res, next)
   try {
     let { devis, limit, page, totalPages } = await fetchDevisOn(req, STATUS_DEVIS.COMPLETED);
     devis = formatClientInDevis(devis);
-    devis = getDetailsDevis(devis);
+    devis = await getDetailsDevis(devis);
     res.status(200).json(new Response("", Status.Ok, { devis, totalPages, page: parseInt(page), limit: parseInt(limit) }));
   } catch (error) {
     next(error);

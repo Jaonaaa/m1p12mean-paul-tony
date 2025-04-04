@@ -57,7 +57,8 @@ devisClientRouter.get("/client", async (req, res, next) => {
     const { page = 1, limit = 10 } = req.query;
     let { data: devis, totalPages } = await paginate(Devis, page, limit, { id_client: _id }, devisPopulate, { created_at: -1 });
     devis = formatClientInDevis(devis);
-    devis = getDetailsDevis(devis);
+    devis = await getDetailsDevis(devis);
+
     res.status(200).json(new Response("", Status.Ok, { devis, totalPages, page: parseInt(page), limit: parseInt(limit) }));
   } catch (error) {
     next(error);
