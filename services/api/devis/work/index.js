@@ -11,7 +11,7 @@ const MESSAGES = {
 };
 
 export const createWork = async (devis_id, begin_at) => {
-  if (!devis_id || !begin_at) throw new MyError(INVALID_DATE);
+  if (!devis_id || !begin_at) throw new MyError(MESSAGES.INVALID_DATE);
   if (isBeforeNow(begin_at)) throw new MyError(MESSAGES.FUTURE_DATE);
 
   const durationDevis = await getDevisDuration(devis_id);
