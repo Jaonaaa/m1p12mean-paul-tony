@@ -11,6 +11,7 @@ import skillRouter from "./skill.js";
 import typeVehicleRouter from "./type_vehicle.js";
 import userRouter from "./user.js";
 import workRouter from "./work/index.js";
+import statRouter from "./stat/index.js";
 
 const apiRouter = express.Router();
 
@@ -26,5 +27,6 @@ apiRouter.use("/service_categories", serviceCategoriesRouter);
 apiRouter.use("/brand_vehicle", brandVehicleRouter);
 apiRouter.use("/type_vehicle", typeVehicleRouter);
 apiRouter.use("/client_vehicle", clientVehicleRouter);
+apiRouter.use("/stat", statRouter);
 
 export default apiRouter;

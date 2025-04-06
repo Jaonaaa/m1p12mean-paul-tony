@@ -21,7 +21,7 @@ export async function registerEmploye({ user, employe }) {
 
 export async function getEmployeByUserId(userId) {
   const employe = await Employe.findOne({ id_user: userId });
-  if (!employe) throw new MyError(NOT_FOUND);
+  if (!employe) throw new MyError(MESSAGES.NOT_FOUND);
   return employe;
 }
 

@@ -33,12 +33,8 @@ export function getCloudinaryUrls(publicIds, options = {}) {
  * @returns {Promise<string>}
  */
 async function uploadBase64ToCloudinary(base64) {
-  try {
-    const result = await cloudinary.uploader.upload(`data:image/jpeg;base64,${base64}`);
-    return result.public_id;
-  } catch (error) {
-    throw error;
-  }
+  const result = await cloudinary.uploader.upload(`data:image/jpeg;base64,${base64}`);
+  return result.public_id;
 }
 
 export default uploadBase64ToCloudinary;

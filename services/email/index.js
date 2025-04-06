@@ -12,25 +12,21 @@ const mailerSend = new MailerSend({
 const sentFrom = new Sender(MAILERSENDER_SENDER, "Vroom");
 
 export const sendEmail = async (email, name) => {
-  try {
-    const recipients = [new Recipient(email, name)];
-    const personalization = [
-      {
-        email: email,
-        data: {
-          name: name,
-        },
+  const recipients = [new Recipient(email, name)];
+  const personalization = [
+    {
+      email: email,
+      data: {
+        name: name,
       },
-    ];
-    const emailParams = new EmailParams()
-      .setFrom(sentFrom)
-      .setTo(recipients)
-      .setReplyTo(sentFrom)
-      .setTemplateId(TEMPLATE_ID)
-      .setPersonalization(personalization);
+    },
+  ];
+  const emailParams = new EmailParams()
+    .setFrom(sentFrom)
+    .setTo(recipients)
+    .setReplyTo(sentFrom)
+    .setTemplateId(TEMPLATE_ID)
+    .setPersonalization(personalization);
 
-    await mailerSend.email.send(emailParams);
-  } catch (error) {
-    throw error;
-  }
+  await mailerSend.email.send(emailParams);
 };
